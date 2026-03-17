@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ClipSync</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0a0a0f">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, system-ui, 'Segoe UI', sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      text-align: center;
+      padding: 20px 16px 10px;
+      position: sticky;
+      top: 0;
+      background: #0a0a0f;
+      z-index: 10;
+      border-bottom: 1px solid #1a1a2e;
+    }
+    .header h1 {
+      font-size: 1.3rem;
+      background: linear-gradient(135deg, #6366f1, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .connection-status {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-top: 6px; font-size: 0.8rem; color: #888;
+    }
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #ef4444; transition: background 0.3s;
+    }
+    .dot.connected { background: #22c55e; }
+    .content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+    .section {
+      background: #141420; border: 1px solid #2a2a3a;
+      border-radius: 14px; padding: 16px;
+    }
+    .section-title {
+      font-size: 0.85rem; color: #a78bfa;
+      margin-bottom: 10px; font-weight: 600;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 0; background: #141420;
+      border-radius: 10px; padding: 4px; margin-bottom: 4px;
+      border: 1px solid #2a2a3a;
+    }
+    .tab {
+      flex: 1; padding: 10px; text-align: center;
+      border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; color: #888; transition: all 0.2s;
+      border: none; background: none;
+    }
+    .tab.active { background: #6366f1; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Paste hero */
+    .paste-hero {
+      background: linear-gradient(135deg, #1e1b4b, #1a1a3e);
+      border: 2px dashed #6366f1; border-radius: 16px;
+      padding: 28px 20px; text-align: center; cursor: pointer;
+      transition: transform 0.1s, border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .paste-hero:active { transform: scale(0.98); border-color: #a78bfa; }
+    .paste-hero-icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .paste-hero-title { font-size: 1.05rem; font-weight: 700; color: #e0e0e0; margin-bottom: 5px; }
+    .paste-hero-sub { font-size: 0.78rem; color: #888; line-height: 1.4; }
+    .paste-hero-hint {
+      margin-top: 12px; padding: 8px 20px;
+      background: #6366f1; color: white; border-radius: 20px;
+      font-size: 0.85rem; font-weight: 600; display: inline-block;
+    }
+
+    .pc-clipboard {
+      background: #1a1a2e; border-radius: 10px; padding: 14px;
+      font-size: 0.9rem; color: #ddd; min-height: 60px; max-height: 180px;
+      overflow-y: auto; white-space: pre-wrap; word-break: break-word;
+      line-height: 1.5; -webkit-user-select: all; user-select: all;
+    }
+    .btn {
+      width: 100%; margin-top: 10px; padding: 12px;
+      color: white; border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-purple { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+    .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+    .send-textarea {
+      width: 100%; min-height: 80px; background: #1a1a2e;
+      border: 1px solid #2a2a3a; border-radius: 10px; padding: 14px;
+      color: #e0e0e0; font-size: 0.9rem; font-family: inherit;
+      resize: vertical; outline: none; transition: border-color 0.2s;
+    }
+    .send-textarea:focus { border-color: #6366f1; }
+    .send-textarea::placeholder { color: #555; }
+
+    /* Shortcut setup */
+    .setup-steps { padding-left: 0; list-style: none; counter-reset: step; }
+    .setup-steps li {
+      counter-increment: step; padding: 12px 12px 12px 45px;
+      background: #1a1a2e; border-radius: 10px; margin-bottom: 8px;
+      font-size: 0.85rem; color: #ccc; line-height: 1.5; position: relative;
+    }
+    .setup-steps li::before {
+      content: counter(step);
+      position: absolute; left: 12px; top: 12px;
+      width: 24px; height: 24px; background: #6366f1;
+      border-radius: 50%; text-align: center; line-height: 24px;
+      font-size: 0.8rem; font-weight: bold; color: white;
+    }
+    .url-box {
+      background: #0d0d1a; padding: 10px 14px; border-radius: 8px;
+      font-family: monospace; font-size: 0.75rem; color: #a78bfa;
+      margin-top: 8px; word-break: break-all; cursor: pointer;
+      border: 1px solid #2a2a3a; transition: border-color 0.2s;
+    }
+    .url-box:active { border-color: #6366f1; }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-ios { background: #1e1b4b; color: #a78bfa; }
+    .badge-android { background: #1b4b1e; color: #86efac; }
+
+    .toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #6366f1; color: white; padding: 12px 28px;
+      border-radius: 24px; font-size: 0.95rem; font-weight: 600;
+      transition: transform 0.3s ease; z-index: 100; pointer-events: none;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.success { background: #22c55e; box-shadow: 0 4px 20px rgba(34,197,94,0.4); }
+
+    .history-item {
+      padding: 10px 12px; background: #1a1a2e; border-radius: 8px;
+      margin-bottom: 6px; font-size: 0.85rem; color: #aaa;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .history-item:active { background: #252540; }
+    .history-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 10px; }
+    .history-time { font-size: 0.75rem; color: #555; white-space: nowrap; }
+    .empty-state { text-align: center; color: #555; padding: 20px; font-size: 0.85rem; }
+    .hidden-paste { position: fixed; top: -9999px; left: -9999px; opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>&#128274; ClipSync</h1>
+    <div class="connection-status">
+      <span class="dot" id="dot"></span>
+      <span id="connText">Ulanmoqda...</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('sync')">&#128260; Sync</button>
+      <button class="tab" onclick="switchTab('setup')">&#9881;&#65039; Sozlash</button>
+      <button class="tab" onclick="switchTab('history')">&#128336; Tarix</button>
+    </div>
+
+    <!-- === SYNC TAB === -->
+    <div class="tab-content active" id="tab-sync">
+      <!-- Katta paste tugmasi -->
+      <div class="paste-hero" id="pasteHero" onclick="triggerPaste()">
+        <div class="paste-hero-icon">&#128203;</div>
+        <div class="paste-hero-title">Bosing &#8594; Paste qiling</div>
+        <div class="paste-hero-sub">
+          Copy qilgan narsingizni shu yerga paste qiling<br>
+          Avtomatik kompyuterga tushadi
+        </div>
+        <div class="paste-hero-hint">&#128073; Bosing</div>
+      </div>
+      <textarea class="hidden-paste" id="hiddenPaste"></textarea>
+
+      <!-- PC clipboard -->
+      <div class="section">
+        <div class="section-title">&#128187; Kompyuter Clipboard</div>
+        <div class="pc-clipboard" id="pcClipboard">Ulanishni kutmoqda...</div>
+        <button class="btn btn-purple" onclick="copyPcClipboard()">&#128203; Telefonga nusxalash</button>
+      </div>
+
+      <!-- Manual input -->
+      <div class="section">
+        <div class="section-title">&#128221; Matn yozib yuborish</div>
+        <textarea class="send-textarea" id="sendText" placeholder="Matn yozing..."></textarea>
+        <button class="btn btn-green" onclick="sendToPC()">&#128640; Yuborish</button>
+      </div>
+    </div>
+
+    <!-- === SETUP TAB (iOS Shortcut) === -->
+    <div class="tab-content" id="tab-setup">
+      <div class="section">
+        <div class="section-title">&#127822; iOS Shortcut (tavsiya etiladi!)</div>
+        <p style="font-size: 0.83rem; color: #aaa; margin-bottom: 14px; line-height: 1.5;">
+          iOS Shortcut orqali <strong style="color:#e0e0e0;">bitta tugma</strong> bosib clipboard'ni PCga yuborasiz.
+          Brauzer ochish shart emas!
+        </p>
+        <ol class="setup-steps">
+          <li>
+            iPhone'da <strong>Shortcuts</strong> (Yorliqlar) ilovasini oching
+          </li>
+          <li>
+            <strong>"+"</strong> bosib yangi shortcut yarating.<br>
+            <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong> qo'shing
+          </li>
+          <li>
+            Yana <strong>"Add Action"</strong> &#8594; <strong>"Get Contents of URL"</strong> qo'shing.<br>
+            URL maydoniga pastdagi manzilni yozing:
+            <div class="url-box" id="sendUrlBox" onclick="copyUrl(this)">Yuklanmoqda...</div>
+          </li>
+          <li>
+            <strong>"Get Contents of URL"</strong> ni bosing:<br>
+            &#8226; <strong>Method:</strong> POST<br>
+            &#8226; <strong>Request Body:</strong> File<br>
+            &#8226; <strong>File:</strong> Clipboard (oldingi action natijasi)
+          </li>
+          <li>
+            Shortcut'ga nom bering: <strong>"PC ga yuborish"</strong><br>
+            &#8226; Tepadagi &#9660; belgini bosing &#8594; <strong>"Add to Home Screen"</strong>
+          </li>
+          <li>
+            Tayyor! Endi istalgan joyda copy qilib, home screen'dagi ikonkani bosasiz — <strong>avtomatik PCga tushadi!</strong>
+          </li>
+        </ol>
+      </div>
+
+      <div class="section">
+        <div class="section-title">&#128187; PC &#8594; Telefon (PC clipboard olish)</div>
+        <p style="font-size: 0.83rem; color: #aaa; margin-bottom: 14px; line-height: 1.5;">
+          PC clipboard'ini olish uchun yana bitta shortcut yarating:
+        </p>
+        <ol class="setup-steps">
+          <li>
+            Yangi Shortcut &#8594; <strong>"Get Contents of URL"</strong> qo'shing.<br>
+            URL:
+            <div class="url-box" id="getUrlBox" onclick="copyUrl(this)">Yuklanmoqda...</div>
+          </li>
+          <li>
+            <strong>"Copy to Clipboard"</strong> action qo'shing.<br>
+            Natija avtomatik clipboard'ga tushadi.
+          </li>
+          <li>
+            Nom: <strong>"PC dan olish"</strong>, Home Screen'ga qo'shing.
+          </li>
+        </ol>
+      </div>
+
+      <div class="section">
+        <div class="section-title">&#129302; Android (Tasker / HTTP Shortcuts)</div>
+        <p style="font-size: 0.83rem; color: #aaa; line-height: 1.5;">
+          Android uchun <strong>HTTP Shortcuts</strong> ilovasini o'rnating (Play Store'da bepul).<br><br>
+          &#8226; Yangi shortcut yarating<br>
+          &#8226; URL: <span style="color: #a78bfa;" id="androidUrl">...</span><br>
+          &#8226; Method: POST<br>
+          &#8226; Body: <code>{%clipboard}</code><br>
+          &#8226; Home screen'ga qo'shing
+        </p>
+      </div>
+    </div>
+
+    <!-- === HISTORY TAB === -->
+    <div class="tab-content" id="tab-history">
+      <div class="section">
+        <div class="section-title">&#128336; Tarix</div>
+        <div id="history">
+          <div class="empty-state">Hali tarix yo'q</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    let ws;
+    let pcClipboardText = '';
+    let history = JSON.parse(localStorage.getItem('clipsync_history') || '[]');
+
+    if (token) {
+      localStorage.setItem('clipsync_token', token);
+      localStorage.setItem('clipsync_host', window.location.host);
+    }
+
+    // === TABS ===
+    function switchTab(name) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // === SHORTCUT URLs ===
+    async function loadShortcutUrls() {
+      try {
+        const res = await fetch('/api/shortcut');
+        const data = await res.json();
+        document.getElementById('sendUrlBox').textContent = data.sendUrl;
+        document.getElementById('getUrlBox').textContent = data.getUrl;
+        document.getElementById('androidUrl').textContent = data.sendUrl;
+      } catch {}
+    }
+    loadShortcutUrls();
+
+    function copyUrl(el) {
+      const text = el.textContent;
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => showToast('URL nusxalandi!', true));
+      } else {
+        fallbackCopy(text);
+      }
+    }
+
+    // === TOAST ===
+    function showToast(msg, isSuccess) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (isSuccess ? ' success' : '');
+      setTimeout(() => t.className = 'toast', 2500);
+    }
+
+    // === HISTORY ===
+    function addToHistory(text, source) {
+      if (!text) return;
+      history.unshift({ text: text.substring(0, 200), source, time: new Date().toLocaleTimeString() });
+      if (history.length > 30) history.pop();
+      localStorage.setItem('clipsync_history', JSON.stringify(history));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history');
+      if (history.length === 0) {
+        container.innerHTML = '<div class="empty-state">Hali tarix yo\'q</div>';
+        return;
+      }
+      container.innerHTML = history.slice(0, 15).map((h, i) => `
+        <div class="history-item" onclick="resendHistory(${i})">
+          <span class="history-text">${h.source === 'pc' ? '&#128187;' : '&#128241;'} ${escapeHtml(h.text)}</span>
+          <span class="history-time">${h.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function resendHistory(i) {
+      if (history[i]) sendTextToPC(history[i].text);
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // === PASTE HERO ===
+    function triggerPaste() {
+      const h = document.getElementById('hiddenPaste');
+      h.value = '';
+      h.style.cssText = 'position:fixed;top:50%;left:0;width:100%;opacity:0.01;height:50px;font-size:16px;';
+      h.focus();
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(text => {
+          if (text) {
+            sendTextToPC(text);
+            h.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+          }
+        }).catch(() => {});
+      }
+    }
+
+    document.getElementById('hiddenPaste').addEventListener('input', () => {
+      setTimeout(() => {
+        const h = document.getElementById('hiddenPaste');
+        if (h.value) {
+          sendTextToPC(h.value);
+          h.value = '';
+          h.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+          h.blur();
+        }
+      }, 100);
+    });
+
+    // === SEND ===
+    function sendTextToPC(text) {
+      if (!text) return;
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'clipboard', text }));
+        addToHistory(text, 'phone');
+        showToast('Kompyuterga yuborildi!', true);
+      } else {
+        showToast('Ulanish yo\'q');
+      }
+    }
+
+    function sendToPC() {
+      const el = document.getElementById('sendText');
+      if (!el.value) return showToast('Matn kiriting');
+      sendTextToPC(el.value);
+      el.value = '';
+    }
+
+    // === WEBSOCKET ===
+    function connectWebSocket() {
+      ws = new WebSocket(`ws://${window.location.host}/ws?token=${token}`);
+
+      ws.onopen = () => {
+        document.getElementById('dot').classList.add('connected');
+        document.getElementById('connText').textContent = 'Ulangan';
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'clipboard') {
+            pcClipboardText = msg.text;
+            document.getElementById('pcClipboard').textContent = msg.text || '(bo\'sh)';
+            if (msg.source === 'pc') addToHistory(msg.text, 'pc');
+          }
+        } catch {}
+      };
+
+      ws.onclose = () => {
+        document.getElementById('dot').classList.remove('connected');
+        document.getElementById('connText').textContent = 'Qayta ulanmoqda...';
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = () => ws.close();
+    }
+
+    // === COPY FROM PC ===
+    function copyPcClipboard() {
+      if (!pcClipboardText) return showToast('Clipboard bo\'sh');
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(pcClipboardText)
+          .then(() => showToast('Nusxalandi!', true))
+          .catch(() => fallbackCopy(pcClipboardText));
+      } else {
+        fallbackCopy(pcClipboardText);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('Nusxalandi!', true);
+      } catch {
+        showToast('Matnni bosib ushlab nusxalang');
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById('pcClipboard'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      }
+      document.body.removeChild(ta);
+    }
+
+    // Enter = send, textarea paste = auto send
+    document.getElementById('sendText').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendToPC(); }
+    });
+    document.getElementById('sendText').addEventListener('paste', () => {
+      setTimeout(() => {
+        const el = document.getElementById('sendText');
+        if (el.value) { sendTextToPC(el.value); el.value = ''; }
+      }, 100);
+    });
+
+    renderHistory();
+    connectWebSocket();
+  </script>
+</body>
+</html>

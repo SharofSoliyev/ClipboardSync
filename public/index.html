@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClipSync - Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0a0f;
+      color: #e0e0e0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      padding: 40px 20px 10px;
+    }
+    .header h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .header p { color: #888; font-size: 0.95rem; }
+
+    /* Nav tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 0;
+      max-width: 900px;
+      width: calc(100% - 60px);
+      background: #141420;
+      border: 1px solid #2a2a3a;
+      border-radius: 12px;
+      padding: 4px;
+      margin: 15px 0;
+    }
+    .nav-tab {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #888;
+      transition: all 0.2s;
+      border: none;
+      background: none;
+    }
+    .nav-tab.active { background: #6366f1; color: white; }
+    .nav-tab:hover:not(.active) { color: #ccc; }
+    .tab-page { display: none; width: 100%; }
+    .tab-page.active { display: flex; flex-direction: column; align-items: center; }
+
+    .main {
+      display: flex;
+      gap: 30px;
+      padding: 20px 30px;
+      max-width: 900px;
+      width: 100%;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .card {
+      background: #141420;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 30px;
+      flex: 1;
+      min-width: 300px;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      color: #a78bfa;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .qr-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qr-container img {
+      border-radius: 12px;
+      background: white;
+      padding: 10px;
+      max-width: 280px;
+    }
+    .qr-url {
+      margin-top: 15px;
+      padding: 10px 16px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #8b5cf6;
+      word-break: break-all;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .qr-url:hover { background: #222240; }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #1e1e30;
+    }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { color: #888; font-size: 0.9rem; }
+    .info-value { color: #e0e0e0; font-weight: 500; font-size: 0.9rem; }
+    .status-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+    .status-dot.online { background: #22c55e; }
+    .status-dot.offline { background: #ef4444; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .clipboard-preview {
+      margin-top: 15px;
+      padding: 15px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .expire-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #1e1b4b;
+      color: #a78bfa;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+    .devices-count {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #6366f1;
+    }
+    .quick-guide {
+      background: #141420;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 20px 30px;
+      max-width: 840px;
+      width: calc(100% - 60px);
+      margin-bottom: 20px;
+    }
+    .quick-guide h3 {
+      color: #a78bfa;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+    .quick-guide ol {
+      padding-left: 20px;
+      color: #aaa;
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    /* === INSTALL PAGE === */
+    .install-container {
+      max-width: 840px;
+      width: calc(100% - 60px);
+      padding: 20px 0 40px;
+    }
+    .install-section {
+      background: #141420;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 24px 30px;
+      margin-bottom: 16px;
+    }
+    .install-section h3 {
+      color: #a78bfa;
+      font-size: 1.05rem;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .install-section p, .install-section li {
+      color: #bbb;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    .install-section ol, .install-section ul {
+      padding-left: 22px;
+      margin-top: 8px;
+    }
+    .install-section li { margin-bottom: 6px; }
+    .install-section strong { color: #e0e0e0; }
+    .code-block {
+      background: #0d0d1a;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      color: #a78bfa;
+      margin: 10px 0;
+      overflow-x: auto;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+    .code-block:hover { border-color: #6366f1; }
+    .code-block::after {
+      content: 'Nusxalash';
+      position: absolute;
+      top: 8px; right: 12px;
+      font-size: 0.7rem;
+      color: #555;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .code-block:hover::after { color: #888; }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px; height: 28px;
+      background: #6366f1;
+      color: white;
+      border-radius: 50%;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .step-row {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid #1a1a2e;
+    }
+    .step-row:last-child { border-bottom: none; }
+    .step-text { flex: 1; }
+    .badge-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .badge-ios { background: #1e1b4b; color: #a78bfa; }
+    .badge-android { background: #1b4b1e; color: #86efac; }
+    .badge-windows { background: #1b2d4b; color: #93c5fd; }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .feature-item {
+      background: #1a1a2e;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: #ccc;
+    }
+    .feature-item strong { display: block; color: #e0e0e0; margin-bottom: 4px; }
+    .url-display {
+      background: #0d0d1a;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #a78bfa;
+      word-break: break-all;
+      margin: 8px 0;
+      cursor: pointer;
+      border: 1px solid #2a2a3a;
+      transition: border-color 0.2s;
+    }
+    .url-display:hover { border-color: #6366f1; }
+    .shortcut-img-guide {
+      background: #1a1a2e;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 10px 0;
+    }
+    .shortcut-img-guide p {
+      margin-bottom: 8px;
+    }
+    .footer {
+      padding: 20px;
+      color: #444;
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    .footer a { color: #6366f1; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>&#128274; ClipSync</h1>
+    <p>Telefon va kompyuter o'rtasida clipboard sinxronlash</p>
+  </div>
+
+  <!-- Nav tabs -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchPage('dashboard')">&#128200; Dashboard</button>
+    <button class="nav-tab" onclick="switchPage('install')">&#128218; O'rnatish</button>
+  </div>
+
+  <!-- === DASHBOARD PAGE === -->
+  <div class="tab-page active" id="page-dashboard">
+    <div class="main">
+      <div class="card qr-container">
+        <h2>&#128247; QR Code</h2>
+        <img id="qrImage" src="" alt="QR Code yuklanmoqda...">
+        <div class="qr-url" id="qrUrl" title="Bosib nusxalash">Yuklanmoqda...</div>
+        <div style="margin-top: 10px;">
+          <span class="expire-badge" id="expireBadge">...</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>&#128225; Server Ma'lumotlari</h2>
+        <div class="info-row">
+          <span class="info-label">Holat</span>
+          <span class="info-value"><span class="status-dot online" id="statusDot"></span><span id="statusText">Ishlamoqda</span></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">IP Manzil</span>
+          <span class="info-value" id="ipAddress">...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Port</span>
+          <span class="info-value" id="portNum">...</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ulangan qurilmalar</span>
+          <span class="devices-count" id="deviceCount">0</span>
+        </div>
+
+        <h2 style="margin-top: 25px;">&#128203; Joriy Clipboard</h2>
+        <div class="clipboard-preview" id="clipboardPreview">Yuklanmoqda...</div>
+      </div>
+    </div>
+
+    <div class="quick-guide">
+      <h3>Tezkor boshlash</h3>
+      <ol>
+        <li>Telefonda QR kodni skanerlang (yoki URL manzilni brauzerda oching)</li>
+        <li>Telefoningizda matn yozing yoki joylashtiring — avtomatik kompyuterga yuboriladi</li>
+        <li>Kompyuterda nusxalangan matn avtomatik telefoningizda ko'rinadi</li>
+        <li>Bitta Wi-Fi tarmoqda bo'lishingiz kerak!</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- === INSTALL / SETUP PAGE === -->
+  <div class="tab-page" id="page-install">
+    <div class="install-container">
+
+      <!-- Xususiyatlar -->
+      <div class="install-section">
+        <h3>&#11088; ClipSync nima?</h3>
+        <p>ClipSync — telefoningiz va Windows kompyuter o'rtasida clipboard'ni sinxronlash vositasi. Huddi Apple'ning Universal Clipboard xususiyati — faqat Windows uchun.</p>
+        <div class="feature-grid">
+          <div class="feature-item"><strong>&#128221; Matn</strong>Har qanday tildagi matnni sinxronlash (kirill, lotin, xitoy...)</div>
+          <div class="feature-item"><strong>&#127912; Rasmlar</strong>PNG, JPEG, GIF, WebP, BMP rasmlarni clipboard'ga o'rnatish</div>
+          <div class="feature-item"><strong>&#9889; Real-time</strong>WebSocket orqali bir zumda yetkazish</div>
+          <div class="feature-item"><strong>&#128274; Xavfsiz</strong>UUID token, faqat lokal tarmoqda ishlaydi</div>
+          <div class="feature-item"><strong>&#128260; Ikki tomonlama</strong>PC &#8594; Telefon va Telefon &#8594; PC</div>
+          <div class="feature-item"><strong>&#127822; iOS Shortcut</strong>Brauzer ochmasdan bitta tugma bilan yuborish</div>
+        </div>
+      </div>
+
+      <!-- O'rnatish bosqichlari -->
+      <div class="install-section">
+        <h3><span class="badge-tag badge-windows">Windows</span> Kompyuterga o'rnatish</h3>
+        <p>Oldin <a href="https://nodejs.org/" target="_blank" style="color:#6366f1;">Node.js</a> (v16+) o'rnatilgan bo'lishi kerak.</p>
+
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <div class="step-text">
+            <strong>Loyihani yuklab olish</strong>
+            <div class="code-block" onclick="copyCode(this)">git clone https://github.com/SharofSoliyev/ClipboardSync.git</div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <div class="step-text">
+            <strong>Papkaga kirish</strong>
+            <div class="code-block" onclick="copyCode(this)">cd ClipboardSync</div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <div class="step-text">
+            <strong>Bog'liqliklarni o'rnatish</strong>
+            <div class="code-block" onclick="copyCode(this)">npm install</div>
+          </div>
+        </div>
+
+        <div class="step-row">
+          <span class="step-num">4</span>
+          <div class="step-text">
+            <strong>Serverni ishga tushirish</strong>
+            <div class="code-block" onclick="copyCode(this)">npm start</div>
+            <p style="margin-top:6px;">Yoki <code style="color:#a78bfa;">start.bat</code> faylni ikki marta bosing.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Telefon ulash -->
+      <div class="install-section">
+        <h3>&#128241; Telefonni ulash</h3>
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <div class="step-text">
+            <strong>Telefon va kompyuter bitta Wi-Fi tarmoqda</strong> bo'lishi kerak
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <div class="step-text">
+            Dashboard'dagi <strong>QR code</strong>'ni telefoningiz bilan skanerlang
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <div class="step-text">
+            Mobil sahifada clipboard sinxronlashni boshlang!
+          </div>
+        </div>
+      </div>
+
+      <!-- iOS Shortcut -->
+      <div class="install-section">
+        <h3><span class="badge-tag badge-ios">iOS</span> iOS Shortcut sozlash (tavsiya etiladi!)</h3>
+        <p>Brauzer ochmasdan <strong>bitta tugma</strong> bosib clipboard'ni PCga yuborasiz.</p>
+
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <div class="step-text">
+            iPhone'da <strong>Shortcuts</strong> (Yorliqlar) ilovasini oching
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <div class="step-text">
+            <strong>"+"</strong> bosib yangi shortcut yarating. <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong> qo'shing
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <div class="step-text">
+            Yana <strong>"Add Action"</strong> &#8594; <strong>"Get Contents of URL"</strong> qo'shing. URL maydoniga:
+            <div class="url-display" id="installSendUrl" onclick="copyCode(this)">Yuklanmoqda...</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">4</span>
+          <div class="step-text">
+            <strong>"Get Contents of URL"</strong> sozlamalarida:
+            <ul style="margin-top:6px;">
+              <li><strong>Method:</strong> POST</li>
+              <li><strong>Request Body:</strong> File</li>
+              <li><strong>File:</strong> Clipboard (oldingi action natijasi)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">5</span>
+          <div class="step-text">
+            Shortcut'ga nom bering: <strong>"PC ga yuborish"</strong><br>
+            Tepadagi &#9660; belgini bosing &#8594; <strong>"Add to Home Screen"</strong>
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">6</span>
+          <div class="step-text">
+            Tayyor! Endi istalgan joyda <strong>copy</strong> qilib, home screen'dagi ikonkani bosasiz &#8594; <strong>avtomatik PCga tushadi!</strong>
+          </div>
+        </div>
+
+        <div class="shortcut-img-guide">
+          <p style="color:#a78bfa; font-weight:600; font-size:0.9rem;">&#128161; Back Tap (bonus)</p>
+          <p>Settings &#8594; Accessibility &#8594; Touch &#8594; Back Tap &#8594; Double Tap &#8594; yaratgan Shortcut'ingizni tanlang.</p>
+          <p>Endi telefonning orqasiga <strong>2 marta tiqillatib</strong> clipboard yuborasiz!</p>
+        </div>
+      </div>
+
+      <!-- PC dan telefonga -->
+      <div class="install-section">
+        <h3><span class="badge-tag badge-ios">iOS</span> PC &#8594; Telefon Shortcut</h3>
+        <p>PC clipboard'ini telefonga olish uchun yana bitta shortcut yarating:</p>
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <div class="step-text">
+            Yangi Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:
+            <div class="url-display" id="installGetUrl" onclick="copyCode(this)">Yuklanmoqda...</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <div class="step-text">
+            <strong>"Copy to Clipboard"</strong> action qo'shing. Natija avtomatik clipboard'ga tushadi.
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <div class="step-text">
+            Nom: <strong>"PC dan olish"</strong>, Home Screen'ga qo'shing.
+          </div>
+        </div>
+      </div>
+
+      <!-- Android -->
+      <div class="install-section">
+        <h3><span class="badge-tag badge-android">Android</span> Android sozlash</h3>
+        <p><a href="https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts" target="_blank" style="color:#86efac;">HTTP Shortcuts</a> ilovasini Play Store'dan o'rnating.</p>
+        <div class="step-row">
+          <span class="step-num">1</span>
+          <div class="step-text">Yangi shortcut yarating</div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">2</span>
+          <div class="step-text">
+            URL:
+            <div class="url-display" id="installAndroidUrl" onclick="copyCode(this)">Yuklanmoqda...</div>
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">3</span>
+          <div class="step-text">
+            Method: <strong>POST</strong>, Body: <code style="color:#86efac;">{%clipboard}</code>
+          </div>
+        </div>
+        <div class="step-row">
+          <span class="step-num">4</span>
+          <div class="step-text">Home screen'ga qo'shing — tayyor!</div>
+        </div>
+      </div>
+
+      <!-- API ma'lumotlari -->
+      <div class="install-section">
+        <h3>&#128268; API Endpointlari</h3>
+        <p>Boshqa ilovalar yoki skriptlar bilan integratsiya qilish uchun:</p>
+        <div style="overflow-x:auto; margin-top:12px;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+            <tr style="border-bottom:1px solid #2a2a3a;">
+              <th style="text-align:left; padding:10px; color:#a78bfa;">Endpoint</th>
+              <th style="text-align:left; padding:10px; color:#a78bfa;">Method</th>
+              <th style="text-align:left; padding:10px; color:#a78bfa;">Tavsif</th>
+            </tr>
+            <tr style="border-bottom:1px solid #1a1a2e;">
+              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/send</td>
+              <td style="padding:10px;">GET/POST</td>
+              <td style="padding:10px; color:#aaa;">Matn yoki rasm yuborish</td>
+            </tr>
+            <tr style="border-bottom:1px solid #1a1a2e;">
+              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/get</td>
+              <td style="padding:10px;">GET</td>
+              <td style="padding:10px; color:#aaa;">PC clipboard'ini olish</td>
+            </tr>
+            <tr style="border-bottom:1px solid #1a1a2e;">
+              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/clipboard</td>
+              <td style="padding:10px;">GET/POST</td>
+              <td style="padding:10px; color:#aaa;">JSON formatda clipboard boshqarish</td>
+            </tr>
+            <tr style="border-bottom:1px solid #1a1a2e;">
+              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/image</td>
+              <td style="padding:10px;">GET</td>
+              <td style="padding:10px; color:#aaa;">Oxirgi rasm</td>
+            </tr>
+            <tr>
+              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/ws</td>
+              <td style="padding:10px;">WebSocket</td>
+              <td style="padding:10px; color:#aaa;">Real-time sinxronlash</td>
+            </tr>
+          </table>
+        </div>
+        <p style="margin-top:10px; font-size:0.8rem; color:#666;">Barcha endpointlarga <code style="color:#a78bfa;">?token=YOUR_TOKEN</code> qo'shish kerak.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    ClipSync v1.0 | <a href="https://github.com/SharofSoliyev/ClipboardSync" target="_blank">GitHub</a> | Open Source | Token 1 oy amal qiladi
+  </div>
+
+  <script>
+    // === PAGE SWITCHING ===
+    function switchPage(name) {
+      document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // === CODE COPY ===
+    function copyCode(el) {
+      const text = el.textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = el.style.borderColor;
+          el.style.borderColor = '#22c55e';
+          setTimeout(() => el.style.borderColor = orig, 1000);
+        });
+      }
+    }
+
+    // === DASHBOARD ===
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/qr');
+        const data = await res.json();
+        document.getElementById('qrImage').src = data.qr;
+        document.getElementById('qrUrl').textContent = data.url;
+        document.getElementById('ipAddress').textContent = data.ip;
+        document.getElementById('portNum').textContent = data.port;
+        const expires = new Date(data.expiresAt);
+        document.getElementById('expireBadge').textContent =
+          `Token: ${expires.toLocaleDateString()} gacha amal qiladi`;
+      } catch (err) {
+        console.error('Dashboard yuklashda xato:', err);
+      }
+    }
+
+    // URL nusxalash
+    document.getElementById('qrUrl').addEventListener('click', function() {
+      navigator.clipboard.writeText(this.textContent).then(() => {
+        const orig = this.textContent;
+        this.textContent = 'Nusxalandi!';
+        setTimeout(() => this.textContent = orig, 1500);
+      });
+    });
+
+    // Token olish va saqlash
+    let dashToken = '';
+    async function getToken() {
+      try {
+        const res = await fetch('/api/shortcut');
+        const data = await res.json();
+        dashToken = data.token;
+        // Install sahifasidagi URL'larni ham yangilash
+        if (document.getElementById('installSendUrl'))
+          document.getElementById('installSendUrl').textContent = data.sendUrl;
+        if (document.getElementById('installGetUrl'))
+          document.getElementById('installGetUrl').textContent = data.getUrl;
+        if (document.getElementById('installAndroidUrl'))
+          document.getElementById('installAndroidUrl').textContent = data.sendUrl;
+      } catch {}
+    }
+
+    // Clipboard va qurilmalar sonini yangilash
+    async function updateStatus() {
+      if (!dashToken) await getToken();
+      try {
+        const [clipRes, infoRes] = await Promise.all([
+          fetch('/api/clipboard?token=' + dashToken),
+          fetch('/api/info')
+        ]);
+        const clipData = await clipRes.json();
+        const infoData = await infoRes.json();
+        if (clipData.text !== undefined) {
+          const preview = clipData.text.length > 500
+            ? clipData.text.substring(0, 500) + '...'
+            : clipData.text || '(bo\'sh)';
+          document.getElementById('clipboardPreview').textContent = preview;
+        }
+        document.getElementById('deviceCount').textContent = infoData.connectedDevices;
+      } catch {}
+    }
+
+    loadDashboard();
+    getToken().then(() => {
+      updateStatus();
+      setInterval(updateStatus, 2000);
+    });
+  </script>
+</body>
+</html>
