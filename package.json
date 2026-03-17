@@ -1,14 +1,18 @@
 {
-  "name": "clipboard",
+  "name": "clipsync",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sync clipboard between phone and Windows PC over Wi-Fi",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["clipboard", "sync", "ios", "android", "windows", "qrcode", "websocket"],
+  "author": "SharofSoliyev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SharofSoliyev/ClipboardSync.git"
+  },
   "type": "commonjs",
   "dependencies": {
     "clipboardy": "^3.0.0",

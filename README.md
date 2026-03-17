@@ -1,31 +1,165 @@
 # ClipSync
 
-**Windows + iOS/Android o'rtasida clipboard sinxronlash.**
+**Sync clipboard between your phone and Windows PC over Wi-Fi.**
 
-Bitta Wi-Fi tarmoqda bo'lganingizda telefoningizda copy qilgan narsangiz avtomatik Windows clipboard'iga tushadi. Huddi Apple'ning Universal Clipboard'i — faqat Windows uchun.
+Copy something on your phone — instantly paste it on Windows with Ctrl+V. Like Apple's Universal Clipboard, but for Windows + iOS/Android.
 
-![ClipSync Dashboard](https://img.shields.io/badge/platform-Windows-blue) ![Node.js](https://img.shields.io/badge/runtime-Node.js-green) ![License](https://img.shields.io/badge/license-ISC-yellow)
+![Platform](https://img.shields.io/badge/platform-Windows-blue) ![Node.js](https://img.shields.io/badge/runtime-Node.js-green) ![License](https://img.shields.io/badge/license-MIT-yellow)
+
+[O'zbek tilida](#o'zbek-tilida) | [English](#features)
+
+## Features
+
+- **Text sync** — Text copied on phone instantly available on Windows (Ctrl+V)
+- **Image sync** — PNG, JPEG, GIF, WebP, BMP support
+- **Bidirectional** — PC → Phone and Phone → PC
+- **Real-time** — Instant sync via WebSocket
+- **iOS Shortcut** — One-tap send, no browser needed
+- **Android HTTP Shortcuts** — Android support included
+- **QR Code** — Connect phone in seconds
+- **Token security** — UUID token valid for 1 month
+- **RTF/HTML cleanup** — iOS formats auto-converted to plain text
+- **Multi-language** — English and Uzbek UI
+- **Cyrillic/Unicode** — Full support for all languages
+
+## Installation
+
+### Requirements
+
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- Windows 10/11
+- Phone and computer must be on the **same Wi-Fi** network
+
+### 1. Clone the project
+
+```bash
+git clone https://github.com/SharofSoliyev/ClipboardSync.git
+cd ClipboardSync
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the server
+
+```bash
+npm start
+```
+
+Or double-click `start.bat`.
+
+The browser opens automatically with QR code and dashboard.
+
+## Usage
+
+### Connect your phone
+
+1. Start the server (`npm start` or `start.bat`)
+2. Scan the **QR code** on the dashboard with your phone
+3. Start syncing on the mobile page!
+
+### iOS Shortcut (recommended)
+
+Send clipboard to PC with one tap, no browser needed:
+
+1. Open **Shortcuts** app on iPhone
+2. Tap **"+"** to create new shortcut
+3. **"Add Action"** → **"Get Clipboard"**
+4. **"Add Action"** → **"Get Contents of URL"**
+5. Set URL to the **Send URL** shown on dashboard
+6. Configure **"Get Contents of URL"**:
+   - **Method:** POST
+   - **Request Body:** File
+   - **File:** Clipboard
+7. Name it and **"Add to Home Screen"**
+8. Done! Copy anything → tap the icon → synced to PC!
+
+> **Back Tap:** Settings → Accessibility → Touch → Back Tap → Double Tap → your Shortcut. Double-tap the back of your phone to send clipboard!
+
+### Android
+
+1. Install [HTTP Shortcuts](https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts) from Play Store
+2. Create new shortcut with the **Send URL** from dashboard
+3. Method: POST, Body: `{%clipboard}`
+4. Add to home screen
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/send?token=TOKEN` | GET/POST | Send clipboard data (text, image, RTF, HTML) |
+| `/api/get?token=TOKEN` | GET | Get PC clipboard (plain text) |
+| `/api/clipboard?token=TOKEN` | GET/POST | Manage clipboard (JSON) |
+| `/api/image?token=TOKEN` | GET | Last received image |
+| `/api/qr` | GET | QR code and server info |
+| `/api/shortcut` | GET | URLs for iOS Shortcut setup |
+| `/api/info` | GET | Server status and connected devices |
+| `/ws?token=TOKEN` | WebSocket | Real-time clipboard sync |
+
+## Project Structure
+
+```
+ClipboardSync/
+├── server.js          # Main server (Express + WebSocket)
+├── package.json       # Dependencies
+├── start.bat          # Quick start for Windows
+├── config.json        # Token config (auto-generated)
+├── LICENSE            # MIT License
+├── CONTRIBUTING.md    # Contribution guide
+├── public/
+│   ├── index.html     # Dashboard (QR code, server info, setup guide)
+│   └── mobile.html    # Mobile UI (sync, setup, history)
+└── images/            # Temporary images folder
+```
+
+## Security
+
+- Works only on local network (no internet exposure)
+- Every connection is token-protected
+- Token auto-renews after 1 month
+- Images auto-deleted after 24 hours
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## License
+
+[MIT](LICENSE) — free to use, modify, and distribute.
+
+---
+
+## O'zbek tilida
+
+# ClipSync
+
+**Telefon va Windows kompyuter o'rtasida clipboard sinxronlash.**
+
+Telefoningizda copy qilgan narsangiz bir zumda Windows clipboard'iga tushadi. Huddi Apple'ning Universal Clipboard'i — faqat Windows uchun.
 
 ## Xususiyatlari
 
-- **Matn sinxronlash** — Telefondan copy qilgan matn darhol Windows'da Ctrl+V bilan ishlatiladi
-- **Rasm sinxronlash** — PNG, JPEG, GIF, WebP, BMP rasmlar qo'llab-quvvatlanadi
+- **Matn sinxronlash** — Telefondan copy qilgan matn Ctrl+V bilan ishlatiladi
+- **Rasm sinxronlash** — PNG, JPEG, GIF, WebP, BMP qo'llab-quvvatlanadi
 - **Ikki tomonlama** — PC → Telefon va Telefon → PC
-- **Real-time** — WebSocket orqali bir zumda sinxronlanadi
-- **iOS Shortcut** — Brauzer ochmasdan bitta tugma bilan yuborish
-- **Android HTTP Shortcuts** — Android uchun ham qo'llab-quvvatlaydi
-- **QR Code** — Telefonni bir zumda ulash
-- **Token xavfsizligi** — 1 oy amal qiladigan UUID token
-- **RTF/HTML tozalash** — iOS'ning murakkab formatlarini avtomatik oddiy matnga aylantiradi
-- **Kirill/Unicode** — Barcha tillar to'liq qo'llab-quvvatlanadi
+- **Real-time** — WebSocket orqali bir zumda
+- **iOS Shortcut** — Bitta tugma bilan yuborish
+- **Android** — HTTP Shortcuts orqali
+- **QR Code** — Telefonni tez ulash
+- **Xavfsizlik** — UUID token, 1 oy amal qiladi
+- **Ko'p tilli** — Ingliz va O'zbek tili
+- **Kirill/Unicode** — Barcha tillar qo'llab-quvvatlanadi
 
 ## O'rnatish
 
 ### Talablar
 
-- [Node.js](https://nodejs.org/) (v16 yoki undan yuqori)
+- [Node.js](https://nodejs.org/) (v16+)
 - Windows 10/11
-- Telefon va kompyuter **bitta Wi-Fi** tarmoqda bo'lishi kerak
+- Telefon va kompyuter **bitta Wi-Fi** tarmoqda
 
 ### 1. Loyihani yuklab olish
 
@@ -48,99 +182,33 @@ npm start
 
 Yoki `start.bat` faylni ikki marta bosing.
 
-Server ishga tushganda brauzer avtomatik ochiladi va QR code ko'rsatadi.
-
 ## Ishlatish
 
-### Telefonni ulash
+1. Serverni ishga tushiring
+2. Dashboard'dagi **QR code**'ni telefoningiz bilan skanerlang
+3. Clipboard sinxronlashni boshlang!
 
-1. Serverni ishga tushiring (`npm start` yoki `start.bat`)
-2. Brauzerda ochilgan dashboard'dagi **QR code**'ni telefoningiz bilan skanerlang
-3. Telefon brauzerida ClipSync mobil sahifasi ochiladi
+### iOS Shortcut (tavsiya etiladi)
 
-### iOS Shortcut orqali (tavsiya etiladi)
+1. **Shortcuts** ilovasini oching
+2. **"+"** → **"Add Action"** → **"Get Clipboard"**
+3. **"Add Action"** → **"Get Contents of URL"** → Dashboard'dagi Send URL
+4. Method: **POST**, Request Body: **File**, File: **Clipboard**
+5. **"Add to Home Screen"**
+6. Tayyor! Copy qilib → ikonkani bosing → PCga tushadi!
 
-Brauzer ochmasdan bitta tugma bilan clipboard yuborish:
+> **Back Tap:** Settings → Accessibility → Touch → Back Tap → Double Tap → Shortcut. Telefonning orqasiga 2 marta tiqillatib clipboard yuborasiz!
 
-1. iPhone'da **Shortcuts** (Yorliqlar) ilovasini oching
-2. **"+"** bosib yangi shortcut yarating
-3. **"Add Action"** → **"Get Clipboard"** qo'shing
-4. Yana **"Add Action"** → **"Get Contents of URL"** qo'shing
-5. URL maydoniga dashboard'dagi **Send URL** manzilini yozing
-6. **"Get Contents of URL"** sozlamalarida:
-   - **Method:** POST
-   - **Request Body:** File
-   - **File:** Clipboard (oldingi action natijasi)
-7. Shortcut'ga nom bering va **"Add to Home Screen"** qiling
-8. Endi istalgan joyda copy qilib, home screen'dagi ikonkani bosasiz!
+### Android
 
-> **Back Tap:** Settings → Accessibility → Touch → Back Tap → Double Tap → Shortcut'ingizni tanlang. Endi telefonning orqasiga 2 marta tiqillatib clipboard yuborasiz.
-
-### Android HTTP Shortcuts orqali
-
-1. [HTTP Shortcuts](https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts) ilovasini o'rnating
-2. Yangi shortcut yarating
-3. URL: dashboard'dagi **Send URL** manzilini kiriting
-4. Method: POST
-5. Body: `{%clipboard}`
-6. Home screen'ga qo'shing
-
-### Mobil web sahifa orqali
-
-QR code skanerlangandan keyin ochilgan sahifada:
-- **"Bosing → Paste qiling"** tugmasini bosib clipboard yuborish
-- Matn maydoniga yozib yuborish
-- PC clipboard'ini ko'rish va telefonga nusxalash
-
-## API Endpointlari
-
-| Endpoint | Method | Tavsif |
-|---|---|---|
-| `/api/send?token=TOKEN` | GET/POST | Clipboard ma'lumot yuborish (matn, rasm, RTF, HTML) |
-| `/api/get?token=TOKEN` | GET | PC clipboard'ini olish (plain text) |
-| `/api/clipboard?token=TOKEN` | GET | PC clipboard'ini JSON formatda olish |
-| `/api/clipboard?token=TOKEN` | POST | PC clipboard'iga matn yozish |
-| `/api/qr` | GET | QR code va server ma'lumotlari |
-| `/api/shortcut` | GET | iOS Shortcut uchun URL'lar |
-| `/api/info` | GET | Server holati va ulangan qurilmalar soni |
-| `/api/image?token=TOKEN` | GET | Oxirgi yuborilgan rasm |
-| `/ws?token=TOKEN` | WebSocket | Real-time clipboard sinxronlash |
-
-## Loyiha tuzilishi
-
-```
-ClipboardSync/
-├── server.js          # Asosiy server (Express + WebSocket)
-├── package.json       # Bog'liqliklar
-├── start.bat          # Windows uchun tezkor ishga tushirish
-├── config.json        # Token konfiguratsiyasi (avtomatik yaratiladi)
-├── public/
-│   ├── index.html     # Dashboard (QR code, server ma'lumotlari)
-│   └── mobile.html    # Mobil UI (sync, sozlash, tarix)
-└── images/            # Vaqtinchalik rasmlar papkasi
-```
-
-## Texnik tafsilotlar
-
-- **Server:** Express.js + WebSocket (ws)
-- **Clipboard:** clipboardy (Node.js clipboard API)
-- **QR Code:** qrcode kutubxonasi
-- **Rasmlar:** PowerShell orqali Windows clipboard'iga o'rnatiladi
-- **RTF Parser:** iOS'dan keluvchi Rich Text Format'ni oddiy matnga aylantiruvchi maxsus parser
-- **HTML Parser:** Link copy qilganda iOS yuboradigan HTML sahifadan URL ajratuvchi parser
-- **Token:** UUID v4, config.json faylda saqlanadi, 1 oy amal qiladi
-- **Port:** 3847 (standart)
-
-## Xavfsizlik
-
-- Faqat lokal tarmoqda ishlaydi (internetga chiqmaydi)
-- Har bir ulanish token bilan himoyalangan
-- Token 1 oydan keyin avtomatik yangilanadi
-- Rasmlar 24 soatdan keyin avtomatik o'chiriladi
+1. [HTTP Shortcuts](https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts) o'rnating
+2. Send URL bilan yangi shortcut yarating
+3. Method: POST, Body: `{%clipboard}`
+4. Home screen'ga qo'shing
 
 ## Litsenziya
 
-ISC
+[MIT](LICENSE)
 
 ---
 

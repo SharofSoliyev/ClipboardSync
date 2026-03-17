@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -25,6 +25,10 @@
       background: #0a0a0f;
       z-index: 10;
       border-bottom: 1px solid #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
     .header h1 {
       font-size: 1.3rem;
@@ -32,6 +36,23 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+    .lang-toggle {
+      display: flex;
+      background: #1a1a2e;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #2a2a3a;
+    }
+    .lang-toggle button {
+      padding: 4px 8px;
+      border: none;
+      background: none;
+      color: #666;
+      font-size: 0.7rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .lang-toggle button.active { background: #2a2a3a; color: #a78bfa; }
     .connection-status {
       display: flex; align-items: center; justify-content: center;
       gap: 6px; margin-top: 6px; font-size: 0.8rem; color: #888;
@@ -41,6 +62,7 @@
       background: #ef4444; transition: background 0.3s;
     }
     .dot.connected { background: #22c55e; }
+    .header-inner { text-align: center; }
     .content { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
     .section {
       background: #141420; border: 1px solid #2a2a3a;
@@ -50,8 +72,6 @@
       font-size: 0.85rem; color: #a78bfa;
       margin-bottom: 10px; font-weight: 600;
     }
-
-    /* Tabs */
     .tabs {
       display: flex; gap: 0; background: #141420;
       border-radius: 10px; padding: 4px; margin-bottom: 4px;
@@ -66,8 +86,6 @@
     .tab.active { background: #6366f1; color: white; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-
-    /* Paste hero */
     .paste-hero {
       background: linear-gradient(135deg, #1e1b4b, #1a1a3e);
       border: 2px dashed #6366f1; border-radius: 16px;
@@ -84,7 +102,6 @@
       background: #6366f1; color: white; border-radius: 20px;
       font-size: 0.85rem; font-weight: 600; display: inline-block;
     }
-
     .pc-clipboard {
       background: #1a1a2e; border-radius: 10px; padding: 14px;
       font-size: 0.9rem; color: #ddd; min-height: 60px; max-height: 180px;
@@ -100,7 +117,6 @@
     .btn:active { transform: scale(0.97); opacity: 0.9; }
     .btn-purple { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
     .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); }
-
     .send-textarea {
       width: 100%; min-height: 80px; background: #1a1a2e;
       border: 1px solid #2a2a3a; border-radius: 10px; padding: 14px;
@@ -109,8 +125,6 @@
     }
     .send-textarea:focus { border-color: #6366f1; }
     .send-textarea::placeholder { color: #555; }
-
-    /* Shortcut setup */
     .setup-steps { padding-left: 0; list-style: none; counter-reset: step; }
     .setup-steps li {
       counter-increment: step; padding: 12px 12px 12px 45px;
@@ -131,13 +145,9 @@
       border: 1px solid #2a2a3a; transition: border-color 0.2s;
     }
     .url-box:active { border-color: #6366f1; }
-    .badge {
-      display: inline-block; padding: 2px 8px; border-radius: 4px;
-      font-size: 0.75rem; font-weight: 600;
-    }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
     .badge-ios { background: #1e1b4b; color: #a78bfa; }
     .badge-android { background: #1b4b1e; color: #86efac; }
-
     .toast {
       position: fixed; bottom: 30px; left: 50%;
       transform: translateX(-50%) translateY(100px);
@@ -148,7 +158,6 @@
     }
     .toast.show { transform: translateX(-50%) translateY(0); }
     .toast.success { background: #22c55e; box-shadow: 0 4px 20px rgba(34,197,94,0.4); }
-
     .history-item {
       padding: 10px 12px; background: #1a1a2e; border-radius: 8px;
       margin-bottom: 6px; font-size: 0.85rem; color: #aaa;
@@ -164,127 +173,85 @@
 </head>
 <body>
   <div class="header">
-    <h1>&#128274; ClipSync</h1>
-    <div class="connection-status">
-      <span class="dot" id="dot"></span>
-      <span id="connText">Ulanmoqda...</span>
+    <div class="header-inner">
+      <h1>&#128274; ClipSync</h1>
+      <div class="connection-status">
+        <span class="dot" id="dot"></span>
+        <span id="connText" data-i18n="connecting">Connecting...</span>
+      </div>
+    </div>
+    <div class="lang-toggle">
+      <button class="active" onclick="setLang('en')">EN</button>
+      <button onclick="setLang('uz')">UZ</button>
     </div>
   </div>
 
   <div class="content">
-    <!-- Tabs -->
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('sync')">&#128260; Sync</button>
-      <button class="tab" onclick="switchTab('setup')">&#9881;&#65039; Sozlash</button>
-      <button class="tab" onclick="switchTab('history')">&#128336; Tarix</button>
+      <button class="tab active" onclick="switchTab('sync')" data-i18n="tab_sync">&#128260; Sync</button>
+      <button class="tab" onclick="switchTab('setup')" data-i18n="tab_setup">&#9881;&#65039; Setup</button>
+      <button class="tab" onclick="switchTab('history')" data-i18n="tab_history">&#128336; History</button>
     </div>
 
     <!-- === SYNC TAB === -->
     <div class="tab-content active" id="tab-sync">
-      <!-- Katta paste tugmasi -->
       <div class="paste-hero" id="pasteHero" onclick="triggerPaste()">
         <div class="paste-hero-icon">&#128203;</div>
-        <div class="paste-hero-title">Bosing &#8594; Paste qiling</div>
-        <div class="paste-hero-sub">
-          Copy qilgan narsingizni shu yerga paste qiling<br>
-          Avtomatik kompyuterga tushadi
-        </div>
-        <div class="paste-hero-hint">&#128073; Bosing</div>
+        <div class="paste-hero-title" data-i18n="paste_title">Tap &#8594; Paste</div>
+        <div class="paste-hero-sub" data-i18n="paste_sub">Paste what you copied here<br>It syncs to your computer automatically</div>
+        <div class="paste-hero-hint" data-i18n="paste_hint">&#128073; Tap here</div>
       </div>
       <textarea class="hidden-paste" id="hiddenPaste"></textarea>
 
-      <!-- PC clipboard -->
       <div class="section">
-        <div class="section-title">&#128187; Kompyuter Clipboard</div>
-        <div class="pc-clipboard" id="pcClipboard">Ulanishni kutmoqda...</div>
-        <button class="btn btn-purple" onclick="copyPcClipboard()">&#128203; Telefonga nusxalash</button>
+        <div class="section-title" data-i18n="pc_clipboard">&#128187; Computer Clipboard</div>
+        <div class="pc-clipboard" id="pcClipboard" data-i18n="waiting">Waiting for connection...</div>
+        <button class="btn btn-purple" onclick="copyPcClipboard()" data-i18n="btn_copy_phone">&#128203; Copy to phone</button>
       </div>
 
-      <!-- Manual input -->
       <div class="section">
-        <div class="section-title">&#128221; Matn yozib yuborish</div>
-        <textarea class="send-textarea" id="sendText" placeholder="Matn yozing..."></textarea>
-        <button class="btn btn-green" onclick="sendToPC()">&#128640; Yuborish</button>
+        <div class="section-title" data-i18n="send_text">&#128221; Send text manually</div>
+        <textarea class="send-textarea" id="sendText" data-placeholder-i18n="type_text" placeholder="Type text..."></textarea>
+        <button class="btn btn-green" onclick="sendToPC()" data-i18n="btn_send">&#128640; Send</button>
       </div>
     </div>
 
-    <!-- === SETUP TAB (iOS Shortcut) === -->
+    <!-- === SETUP TAB === -->
     <div class="tab-content" id="tab-setup">
       <div class="section">
-        <div class="section-title">&#127822; iOS Shortcut (tavsiya etiladi!)</div>
-        <p style="font-size: 0.83rem; color: #aaa; margin-bottom: 14px; line-height: 1.5;">
-          iOS Shortcut orqali <strong style="color:#e0e0e0;">bitta tugma</strong> bosib clipboard'ni PCga yuborasiz.
-          Brauzer ochish shart emas!
-        </p>
+        <div class="section-title" data-i18n="setup_ios_title">&#127822; iOS Shortcut (recommended!)</div>
+        <p style="font-size:0.83rem;color:#aaa;margin-bottom:14px;line-height:1.5;" data-i18n="setup_ios_desc">Send clipboard with <strong style="color:#e0e0e0;">one tap</strong> via iOS Shortcut. No browser needed!</p>
         <ol class="setup-steps">
-          <li>
-            iPhone'da <strong>Shortcuts</strong> (Yorliqlar) ilovasini oching
-          </li>
-          <li>
-            <strong>"+"</strong> bosib yangi shortcut yarating.<br>
-            <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong> qo'shing
-          </li>
-          <li>
-            Yana <strong>"Add Action"</strong> &#8594; <strong>"Get Contents of URL"</strong> qo'shing.<br>
-            URL maydoniga pastdagi manzilni yozing:
-            <div class="url-box" id="sendUrlBox" onclick="copyUrl(this)">Yuklanmoqda...</div>
-          </li>
-          <li>
-            <strong>"Get Contents of URL"</strong> ni bosing:<br>
-            &#8226; <strong>Method:</strong> POST<br>
-            &#8226; <strong>Request Body:</strong> File<br>
-            &#8226; <strong>File:</strong> Clipboard (oldingi action natijasi)
-          </li>
-          <li>
-            Shortcut'ga nom bering: <strong>"PC ga yuborish"</strong><br>
-            &#8226; Tepadagi &#9660; belgini bosing &#8594; <strong>"Add to Home Screen"</strong>
-          </li>
-          <li>
-            Tayyor! Endi istalgan joyda copy qilib, home screen'dagi ikonkani bosasiz — <strong>avtomatik PCga tushadi!</strong>
-          </li>
+          <li data-i18n="setup_ios_1">Open <strong>Shortcuts</strong> app on your iPhone</li>
+          <li data-i18n="setup_ios_2">Tap <strong>"+"</strong> to create new shortcut.<br><strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong></li>
+          <li><span data-i18n="setup_ios_3">Add <strong>"Get Contents of URL"</strong>. Set URL to:</span><div class="url-box" id="sendUrlBox" onclick="copyUrl(this)">Loading...</div></li>
+          <li data-i18n="setup_ios_4"><strong>"Get Contents of URL"</strong> settings:<br>&#8226; <strong>Method:</strong> POST<br>&#8226; <strong>Request Body:</strong> File<br>&#8226; <strong>File:</strong> Clipboard</li>
+          <li data-i18n="setup_ios_5">Name the shortcut. Tap &#9660; &#8594; <strong>"Add to Home Screen"</strong></li>
+          <li data-i18n="setup_ios_6">Done! Copy anything, tap the icon &#8594; <strong>instantly synced to PC!</strong></li>
         </ol>
       </div>
 
       <div class="section">
-        <div class="section-title">&#128187; PC &#8594; Telefon (PC clipboard olish)</div>
-        <p style="font-size: 0.83rem; color: #aaa; margin-bottom: 14px; line-height: 1.5;">
-          PC clipboard'ini olish uchun yana bitta shortcut yarating:
-        </p>
+        <div class="section-title" data-i18n="setup_pc_title">&#128187; PC &#8594; Phone (get PC clipboard)</div>
         <ol class="setup-steps">
-          <li>
-            Yangi Shortcut &#8594; <strong>"Get Contents of URL"</strong> qo'shing.<br>
-            URL:
-            <div class="url-box" id="getUrlBox" onclick="copyUrl(this)">Yuklanmoqda...</div>
-          </li>
-          <li>
-            <strong>"Copy to Clipboard"</strong> action qo'shing.<br>
-            Natija avtomatik clipboard'ga tushadi.
-          </li>
-          <li>
-            Nom: <strong>"PC dan olish"</strong>, Home Screen'ga qo'shing.
-          </li>
+          <li><span data-i18n="setup_pc_1">New Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:</span><div class="url-box" id="getUrlBox" onclick="copyUrl(this)">Loading...</div></li>
+          <li data-i18n="setup_pc_2">Add <strong>"Copy to Clipboard"</strong> action.</li>
+          <li data-i18n="setup_pc_3">Name it and add to Home Screen.</li>
         </ol>
       </div>
 
       <div class="section">
-        <div class="section-title">&#129302; Android (Tasker / HTTP Shortcuts)</div>
-        <p style="font-size: 0.83rem; color: #aaa; line-height: 1.5;">
-          Android uchun <strong>HTTP Shortcuts</strong> ilovasini o'rnating (Play Store'da bepul).<br><br>
-          &#8226; Yangi shortcut yarating<br>
-          &#8226; URL: <span style="color: #a78bfa;" id="androidUrl">...</span><br>
-          &#8226; Method: POST<br>
-          &#8226; Body: <code>{%clipboard}</code><br>
-          &#8226; Home screen'ga qo'shing
-        </p>
+        <div class="section-title" data-i18n="setup_android_title">&#129302; Android (HTTP Shortcuts)</div>
+        <p style="font-size:0.83rem;color:#aaa;line-height:1.5;" data-i18n="setup_android_desc">Install <strong>HTTP Shortcuts</strong> from Play Store.<br><br>&#8226; Create a new shortcut<br>&#8226; URL: <span style="color:#a78bfa;" id="androidUrl">...</span><br>&#8226; Method: POST<br>&#8226; Body: <code>{%clipboard}</code><br>&#8226; Add to home screen</p>
       </div>
     </div>
 
     <!-- === HISTORY TAB === -->
     <div class="tab-content" id="tab-history">
       <div class="section">
-        <div class="section-title">&#128336; Tarix</div>
+        <div class="section-title" data-i18n="history_title">&#128336; History</div>
         <div id="history">
-          <div class="empty-state">Hali tarix yo'q</div>
+          <div class="empty-state" data-i18n="no_history">No history yet</div>
         </div>
       </div>
     </div>
@@ -293,6 +260,116 @@
   <div class="toast" id="toast"></div>
 
   <script>
+    // === i18n ===
+    const i18n = {
+      en: {
+        connecting: 'Connecting...',
+        connected: 'Connected',
+        reconnecting: 'Reconnecting...',
+        tab_sync: '&#128260; Sync',
+        tab_setup: '&#9881;&#65039; Setup',
+        tab_history: '&#128336; History',
+        paste_title: 'Tap &#8594; Paste',
+        paste_sub: 'Paste what you copied here<br>It syncs to your computer automatically',
+        paste_hint: '&#128073; Tap here',
+        pc_clipboard: '&#128187; Computer Clipboard',
+        waiting: 'Waiting for connection...',
+        btn_copy_phone: '&#128203; Copy to phone',
+        send_text: '&#128221; Send text manually',
+        type_text: 'Type text...',
+        btn_send: '&#128640; Send',
+        setup_ios_title: '&#127822; iOS Shortcut (recommended!)',
+        setup_ios_desc: 'Send clipboard with <strong style="color:#e0e0e0;">one tap</strong> via iOS Shortcut. No browser needed!',
+        setup_ios_1: 'Open <strong>Shortcuts</strong> app on your iPhone',
+        setup_ios_2: 'Tap <strong>"+"</strong> to create new shortcut.<br><strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong>',
+        setup_ios_3: 'Add <strong>"Get Contents of URL"</strong>. Set URL to:',
+        setup_ios_4: '<strong>"Get Contents of URL"</strong> settings:<br>&#8226; <strong>Method:</strong> POST<br>&#8226; <strong>Request Body:</strong> File<br>&#8226; <strong>File:</strong> Clipboard',
+        setup_ios_5: 'Name the shortcut. Tap &#9660; &#8594; <strong>"Add to Home Screen"</strong>',
+        setup_ios_6: 'Done! Copy anything, tap the icon &#8594; <strong>instantly synced to PC!</strong>',
+        setup_pc_title: '&#128187; PC &#8594; Phone (get PC clipboard)',
+        setup_pc_1: 'New Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:',
+        setup_pc_2: 'Add <strong>"Copy to Clipboard"</strong> action.',
+        setup_pc_3: 'Name it and add to Home Screen.',
+        setup_android_title: '&#129302; Android (HTTP Shortcuts)',
+        setup_android_desc: 'Install <strong>HTTP Shortcuts</strong> from Play Store.<br><br>&#8226; Create a new shortcut<br>&#8226; URL: <span style="color:#a78bfa;" id="androidUrl">...</span><br>&#8226; Method: POST<br>&#8226; Body: <code>{%clipboard}</code><br>&#8226; Add to home screen',
+        history_title: '&#128336; History',
+        no_history: 'No history yet',
+        sent_to_pc: 'Sent to computer!',
+        no_connection: 'No connection',
+        copied: 'Copied!',
+        url_copied: 'URL copied!',
+        clipboard_empty: 'Clipboard is empty',
+        enter_text: 'Enter text',
+        hold_to_copy: 'Hold text to copy',
+        empty: '(empty)'
+      },
+      uz: {
+        connecting: 'Ulanmoqda...',
+        connected: 'Ulangan',
+        reconnecting: 'Qayta ulanmoqda...',
+        tab_sync: '&#128260; Sync',
+        tab_setup: '&#9881;&#65039; Sozlash',
+        tab_history: '&#128336; Tarix',
+        paste_title: 'Bosing &#8594; Paste qiling',
+        paste_sub: 'Copy qilgan narsingizni shu yerga paste qiling<br>Avtomatik kompyuterga tushadi',
+        paste_hint: '&#128073; Bosing',
+        pc_clipboard: '&#128187; Kompyuter Clipboard',
+        waiting: 'Ulanishni kutmoqda...',
+        btn_copy_phone: '&#128203; Telefonga nusxalash',
+        send_text: '&#128221; Matn yozib yuborish',
+        type_text: 'Matn yozing...',
+        btn_send: '&#128640; Yuborish',
+        setup_ios_title: '&#127822; iOS Shortcut (tavsiya etiladi!)',
+        setup_ios_desc: 'iOS Shortcut orqali <strong style="color:#e0e0e0;">bitta tugma</strong> bosib clipboard\'ni PCga yuborasiz. Brauzer ochish shart emas!',
+        setup_ios_1: 'iPhone\'da <strong>Shortcuts</strong> (Yorliqlar) ilovasini oching',
+        setup_ios_2: '<strong>"+"</strong> bosib yangi shortcut yarating.<br><strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong> qo\'shing',
+        setup_ios_3: 'Yana <strong>"Add Action"</strong> &#8594; <strong>"Get Contents of URL"</strong> qo\'shing. URL maydoniga:',
+        setup_ios_4: '<strong>"Get Contents of URL"</strong> sozlamalarida:<br>&#8226; <strong>Method:</strong> POST<br>&#8226; <strong>Request Body:</strong> File<br>&#8226; <strong>File:</strong> Clipboard (oldingi action natijasi)',
+        setup_ios_5: 'Shortcut\'ga nom bering. &#9660; belgini bosing &#8594; <strong>"Add to Home Screen"</strong>',
+        setup_ios_6: 'Tayyor! Istalgan joyda <strong>copy</strong> qilib, ikonkani bosasiz &#8594; <strong>avtomatik PCga tushadi!</strong>',
+        setup_pc_title: '&#128187; PC &#8594; Telefon (PC clipboard olish)',
+        setup_pc_1: 'Yangi Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:',
+        setup_pc_2: '<strong>"Copy to Clipboard"</strong> action qo\'shing.',
+        setup_pc_3: 'Nom bering va Home Screen\'ga qo\'shing.',
+        setup_android_title: '&#129302; Android (HTTP Shortcuts)',
+        setup_android_desc: '<strong>HTTP Shortcuts</strong> ilovasini Play Store\'dan o\'rnating.<br><br>&#8226; Yangi shortcut yarating<br>&#8226; URL: <span style="color:#a78bfa;" id="androidUrl">...</span><br>&#8226; Method: POST<br>&#8226; Body: <code>{%clipboard}</code><br>&#8226; Home screen\'ga qo\'shing',
+        history_title: '&#128336; Tarix',
+        no_history: 'Hali tarix yo\'q',
+        sent_to_pc: 'Kompyuterga yuborildi!',
+        no_connection: 'Ulanish yo\'q',
+        copied: 'Nusxalandi!',
+        url_copied: 'URL nusxalandi!',
+        clipboard_empty: 'Clipboard bo\'sh',
+        enter_text: 'Matn kiriting',
+        hold_to_copy: 'Matnni bosib ushlab nusxalang',
+        empty: '(bo\'sh)'
+      }
+    };
+
+    let currentLang = localStorage.getItem('clipsync_lang') || 'en';
+
+    function t(key) { return i18n[currentLang][key] || i18n.en[key] || key; }
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('clipsync_lang', lang);
+      applyLang();
+      document.querySelectorAll('.lang-toggle button').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.lang-toggle button[onclick="setLang('${lang}')"]`).classList.add('active');
+    }
+
+    function applyLang() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[currentLang][key]) el.innerHTML = i18n[currentLang][key];
+      });
+      document.querySelectorAll('[data-placeholder-i18n]').forEach(el => {
+        const key = el.getAttribute('data-placeholder-i18n');
+        if (i18n[currentLang][key]) el.placeholder = i18n[currentLang][key];
+      });
+      document.documentElement.lang = currentLang === 'uz' ? 'uz' : 'en';
+    }
+
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
     let ws;
@@ -304,7 +381,6 @@
       localStorage.setItem('clipsync_host', window.location.host);
     }
 
-    // === TABS ===
     function switchTab(name) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
@@ -312,14 +388,14 @@
       event.target.classList.add('active');
     }
 
-    // === SHORTCUT URLs ===
     async function loadShortcutUrls() {
       try {
         const res = await fetch('/api/shortcut');
         const data = await res.json();
         document.getElementById('sendUrlBox').textContent = data.sendUrl;
         document.getElementById('getUrlBox').textContent = data.getUrl;
-        document.getElementById('androidUrl').textContent = data.sendUrl;
+        const androidEls = document.querySelectorAll('#androidUrl');
+        androidEls.forEach(el => el.textContent = data.sendUrl);
       } catch {}
     }
     loadShortcutUrls();
@@ -327,21 +403,17 @@
     function copyUrl(el) {
       const text = el.textContent;
       if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(text).then(() => showToast('URL nusxalandi!', true));
-      } else {
-        fallbackCopy(text);
-      }
+        navigator.clipboard.writeText(text).then(() => showToast(t('url_copied'), true));
+      } else { fallbackCopy(text); }
     }
 
-    // === TOAST ===
     function showToast(msg, isSuccess) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast show' + (isSuccess ? ' success' : '');
-      setTimeout(() => t.className = 'toast', 2500);
+      const tst = document.getElementById('toast');
+      tst.textContent = msg;
+      tst.className = 'toast show' + (isSuccess ? ' success' : '');
+      setTimeout(() => tst.className = 'toast', 2500);
     }
 
-    // === HISTORY ===
     function addToHistory(text, source) {
       if (!text) return;
       history.unshift({ text: text.substring(0, 200), source, time: new Date().toLocaleTimeString() });
@@ -353,7 +425,7 @@
     function renderHistory() {
       const container = document.getElementById('history');
       if (history.length === 0) {
-        container.innerHTML = '<div class="empty-state">Hali tarix yo\'q</div>';
+        container.innerHTML = `<div class="empty-state">${t('no_history')}</div>`;
         return;
       }
       container.innerHTML = history.slice(0, 15).map((h, i) => `
@@ -364,9 +436,7 @@
       `).join('');
     }
 
-    function resendHistory(i) {
-      if (history[i]) sendTextToPC(history[i].text);
-    }
+    function resendHistory(i) { if (history[i]) sendTextToPC(history[i].text); }
 
     function escapeHtml(str) {
       const d = document.createElement('div');
@@ -374,7 +444,6 @@
       return d.innerHTML;
     }
 
-    // === PASTE HERO ===
     function triggerPaste() {
       const h = document.getElementById('hiddenPaste');
       h.value = '';
@@ -402,60 +471,53 @@
       }, 100);
     });
 
-    // === SEND ===
     function sendTextToPC(text) {
       if (!text) return;
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ type: 'clipboard', text }));
         addToHistory(text, 'phone');
-        showToast('Kompyuterga yuborildi!', true);
+        showToast(t('sent_to_pc'), true);
       } else {
-        showToast('Ulanish yo\'q');
+        showToast(t('no_connection'));
       }
     }
 
     function sendToPC() {
       const el = document.getElementById('sendText');
-      if (!el.value) return showToast('Matn kiriting');
+      if (!el.value) return showToast(t('enter_text'));
       sendTextToPC(el.value);
       el.value = '';
     }
 
-    // === WEBSOCKET ===
     function connectWebSocket() {
       ws = new WebSocket(`ws://${window.location.host}/ws?token=${token}`);
-
       ws.onopen = () => {
         document.getElementById('dot').classList.add('connected');
-        document.getElementById('connText').textContent = 'Ulangan';
+        document.getElementById('connText').innerHTML = t('connected');
       };
-
       ws.onmessage = (event) => {
         try {
           const msg = JSON.parse(event.data);
           if (msg.type === 'clipboard') {
             pcClipboardText = msg.text;
-            document.getElementById('pcClipboard').textContent = msg.text || '(bo\'sh)';
+            document.getElementById('pcClipboard').textContent = msg.text || t('empty');
             if (msg.source === 'pc') addToHistory(msg.text, 'pc');
           }
         } catch {}
       };
-
       ws.onclose = () => {
         document.getElementById('dot').classList.remove('connected');
-        document.getElementById('connText').textContent = 'Qayta ulanmoqda...';
+        document.getElementById('connText').innerHTML = t('reconnecting');
         setTimeout(connectWebSocket, 3000);
       };
-
       ws.onerror = () => ws.close();
     }
 
-    // === COPY FROM PC ===
     function copyPcClipboard() {
-      if (!pcClipboardText) return showToast('Clipboard bo\'sh');
+      if (!pcClipboardText) return showToast(t('clipboard_empty'));
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(pcClipboardText)
-          .then(() => showToast('Nusxalandi!', true))
+          .then(() => showToast(t('copied'), true))
           .catch(() => fallbackCopy(pcClipboardText));
       } else {
         fallbackCopy(pcClipboardText);
@@ -467,13 +529,12 @@
       ta.value = text;
       ta.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(ta);
-      ta.focus();
-      ta.select();
+      ta.focus(); ta.select();
       try {
         document.execCommand('copy');
-        showToast('Nusxalandi!', true);
+        showToast(t('copied'), true);
       } catch {
-        showToast('Matnni bosib ushlab nusxalang');
+        showToast(t('hold_to_copy'));
         const range = document.createRange();
         range.selectNodeContents(document.getElementById('pcClipboard'));
         window.getSelection().removeAllRanges();
@@ -482,7 +543,6 @@
       document.body.removeChild(ta);
     }
 
-    // Enter = send, textarea paste = auto send
     document.getElementById('sendText').addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendToPC(); }
     });
@@ -493,6 +553,8 @@
       }, 100);
     });
 
+    // Init
+    setLang(currentLang);
     renderHistory();
     connectWebSocket();
   </script>

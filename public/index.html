@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,18 +27,23 @@
       margin-bottom: 8px;
     }
     .header p { color: #888; font-size: 0.95rem; }
-
-    /* Nav tabs */
-    .nav-tabs {
+    .top-bar {
       display: flex;
       gap: 0;
       max-width: 900px;
       width: calc(100% - 60px);
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0 0;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 0;
       background: #141420;
       border: 1px solid #2a2a3a;
       border-radius: 12px;
       padding: 4px;
-      margin: 15px 0;
+      flex: 1;
     }
     .nav-tab {
       flex: 1;
@@ -55,6 +60,26 @@
     }
     .nav-tab.active { background: #6366f1; color: white; }
     .nav-tab:hover:not(.active) { color: #ccc; }
+    .lang-switch {
+      margin-left: 12px;
+      display: flex;
+      background: #141420;
+      border: 1px solid #2a2a3a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .lang-btn {
+      padding: 10px 14px;
+      border: none;
+      background: none;
+      color: #888;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn.active { background: #2a2a3a; color: #a78bfa; }
+    .lang-btn:hover:not(.active) { color: #ccc; }
     .tab-page { display: none; width: 100%; }
     .tab-page.active { display: flex; flex-direction: column; align-items: center; }
 
@@ -125,11 +150,7 @@
       animation: pulse 2s infinite;
     }
     .status-dot.online { background: #22c55e; }
-    .status-dot.offline { background: #ef4444; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     .clipboard-preview {
       margin-top: 15px;
       padding: 15px;
@@ -151,11 +172,7 @@
       border-radius: 20px;
       font-size: 0.8rem;
     }
-    .devices-count {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #6366f1;
-    }
+    .devices-count { font-size: 1.5rem; font-weight: bold; color: #6366f1; }
     .quick-guide {
       background: #141420;
       border: 1px solid #2a2a3a;
@@ -165,24 +182,10 @@
       width: calc(100% - 60px);
       margin-bottom: 20px;
     }
-    .quick-guide h3 {
-      color: #a78bfa;
-      margin-bottom: 12px;
-      font-size: 1rem;
-    }
-    .quick-guide ol {
-      padding-left: 20px;
-      color: #aaa;
-      font-size: 0.9rem;
-      line-height: 1.8;
-    }
+    .quick-guide h3 { color: #a78bfa; margin-bottom: 12px; font-size: 1rem; }
+    .quick-guide ol { padding-left: 20px; color: #aaa; font-size: 0.9rem; line-height: 1.8; }
 
-    /* === INSTALL PAGE === */
-    .install-container {
-      max-width: 840px;
-      width: calc(100% - 60px);
-      padding: 20px 0 40px;
-    }
+    .install-container { max-width: 840px; width: calc(100% - 60px); padding: 20px 0 40px; }
     .install-section {
       background: #141420;
       border: 1px solid #2a2a3a;
@@ -198,15 +201,8 @@
       align-items: center;
       gap: 8px;
     }
-    .install-section p, .install-section li {
-      color: #bbb;
-      font-size: 0.9rem;
-      line-height: 1.7;
-    }
-    .install-section ol, .install-section ul {
-      padding-left: 22px;
-      margin-top: 8px;
-    }
+    .install-section p, .install-section li { color: #bbb; font-size: 0.9rem; line-height: 1.7; }
+    .install-section ol, .install-section ul { padding-left: 22px; margin-top: 8px; }
     .install-section li { margin-bottom: 6px; }
     .install-section strong { color: #e0e0e0; }
     .code-block {
@@ -225,7 +221,7 @@
     }
     .code-block:hover { border-color: #6366f1; }
     .code-block::after {
-      content: 'Nusxalash';
+      content: attr(data-copy-label);
       position: absolute;
       top: 8px; right: 12px;
       font-size: 0.7rem;
@@ -299,15 +295,8 @@
       padding: 16px;
       margin: 10px 0;
     }
-    .shortcut-img-guide p {
-      margin-bottom: 8px;
-    }
-    .footer {
-      padding: 20px;
-      color: #444;
-      font-size: 0.8rem;
-      text-align: center;
-    }
+    .shortcut-img-guide p { margin-bottom: 8px; }
+    .footer { padding: 20px; color: #444; font-size: 0.8rem; text-align: center; }
     .footer a { color: #6366f1; text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
   </style>
@@ -315,35 +304,40 @@
 <body>
   <div class="header">
     <h1>&#128274; ClipSync</h1>
-    <p>Telefon va kompyuter o'rtasida clipboard sinxronlash</p>
+    <p data-i18n="header_sub">Sync clipboard between phone and computer</p>
   </div>
 
-  <!-- Nav tabs -->
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchPage('dashboard')">&#128200; Dashboard</button>
-    <button class="nav-tab" onclick="switchPage('install')">&#128218; O'rnatish</button>
+  <div class="top-bar">
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchPage('dashboard')" data-i18n="tab_dashboard">&#128200; Dashboard</button>
+      <button class="nav-tab" onclick="switchPage('install')" data-i18n="tab_install">&#128218; Setup</button>
+    </div>
+    <div class="lang-switch">
+      <button class="lang-btn active" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" onclick="setLang('uz')">UZ</button>
+    </div>
   </div>
 
-  <!-- === DASHBOARD PAGE === -->
+  <!-- === DASHBOARD === -->
   <div class="tab-page active" id="page-dashboard">
     <div class="main">
       <div class="card qr-container">
         <h2>&#128247; QR Code</h2>
-        <img id="qrImage" src="" alt="QR Code yuklanmoqda...">
-        <div class="qr-url" id="qrUrl" title="Bosib nusxalash">Yuklanmoqda...</div>
+        <img id="qrImage" src="" alt="Loading QR...">
+        <div class="qr-url" id="qrUrl" title="Click to copy">Loading...</div>
         <div style="margin-top: 10px;">
           <span class="expire-badge" id="expireBadge">...</span>
         </div>
       </div>
 
       <div class="card">
-        <h2>&#128225; Server Ma'lumotlari</h2>
+        <h2 data-i18n="server_info">&#128225; Server Info</h2>
         <div class="info-row">
-          <span class="info-label">Holat</span>
-          <span class="info-value"><span class="status-dot online" id="statusDot"></span><span id="statusText">Ishlamoqda</span></span>
+          <span class="info-label" data-i18n="status">Status</span>
+          <span class="info-value"><span class="status-dot online" id="statusDot"></span><span id="statusText" data-i18n="running">Running</span></span>
         </div>
         <div class="info-row">
-          <span class="info-label">IP Manzil</span>
+          <span class="info-label" data-i18n="ip_address">IP Address</span>
           <span class="info-value" id="ipAddress">...</span>
         </div>
         <div class="info-row">
@@ -351,263 +345,266 @@
           <span class="info-value" id="portNum">...</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Ulangan qurilmalar</span>
+          <span class="info-label" data-i18n="connected_devices">Connected devices</span>
           <span class="devices-count" id="deviceCount">0</span>
         </div>
 
-        <h2 style="margin-top: 25px;">&#128203; Joriy Clipboard</h2>
-        <div class="clipboard-preview" id="clipboardPreview">Yuklanmoqda...</div>
+        <h2 style="margin-top: 25px;" data-i18n="current_clipboard">&#128203; Current Clipboard</h2>
+        <div class="clipboard-preview" id="clipboardPreview" data-i18n="loading">Loading...</div>
       </div>
     </div>
 
     <div class="quick-guide">
-      <h3>Tezkor boshlash</h3>
+      <h3 data-i18n="quick_start">Quick Start</h3>
       <ol>
-        <li>Telefonda QR kodni skanerlang (yoki URL manzilni brauzerda oching)</li>
-        <li>Telefoningizda matn yozing yoki joylashtiring — avtomatik kompyuterga yuboriladi</li>
-        <li>Kompyuterda nusxalangan matn avtomatik telefoningizda ko'rinadi</li>
-        <li>Bitta Wi-Fi tarmoqda bo'lishingiz kerak!</li>
+        <li data-i18n="qs_1">Scan the QR code with your phone (or open the URL in browser)</li>
+        <li data-i18n="qs_2">Type or paste text on your phone — it syncs to your computer automatically</li>
+        <li data-i18n="qs_3">Text copied on your computer appears on your phone automatically</li>
+        <li data-i18n="qs_4">Both devices must be on the same Wi-Fi network!</li>
       </ol>
     </div>
   </div>
 
-  <!-- === INSTALL / SETUP PAGE === -->
+  <!-- === INSTALL / SETUP === -->
   <div class="tab-page" id="page-install">
     <div class="install-container">
 
-      <!-- Xususiyatlar -->
       <div class="install-section">
-        <h3>&#11088; ClipSync nima?</h3>
-        <p>ClipSync — telefoningiz va Windows kompyuter o'rtasida clipboard'ni sinxronlash vositasi. Huddi Apple'ning Universal Clipboard xususiyati — faqat Windows uchun.</p>
+        <h3>&#11088; <span data-i18n="what_is">What is ClipSync?</span></h3>
+        <p data-i18n="what_is_desc">ClipSync is a tool that syncs clipboard between your phone and Windows computer. Like Apple's Universal Clipboard — but for Windows.</p>
         <div class="feature-grid">
-          <div class="feature-item"><strong>&#128221; Matn</strong>Har qanday tildagi matnni sinxronlash (kirill, lotin, xitoy...)</div>
-          <div class="feature-item"><strong>&#127912; Rasmlar</strong>PNG, JPEG, GIF, WebP, BMP rasmlarni clipboard'ga o'rnatish</div>
-          <div class="feature-item"><strong>&#9889; Real-time</strong>WebSocket orqali bir zumda yetkazish</div>
-          <div class="feature-item"><strong>&#128274; Xavfsiz</strong>UUID token, faqat lokal tarmoqda ishlaydi</div>
-          <div class="feature-item"><strong>&#128260; Ikki tomonlama</strong>PC &#8594; Telefon va Telefon &#8594; PC</div>
-          <div class="feature-item"><strong>&#127822; iOS Shortcut</strong>Brauzer ochmasdan bitta tugma bilan yuborish</div>
+          <div class="feature-item"><strong>&#128221; <span data-i18n="f_text">Text</span></strong><span data-i18n="f_text_d">Sync text in any language (Cyrillic, Latin, CJK...)</span></div>
+          <div class="feature-item"><strong>&#127912; <span data-i18n="f_images">Images</span></strong><span data-i18n="f_images_d">PNG, JPEG, GIF, WebP, BMP clipboard support</span></div>
+          <div class="feature-item"><strong>&#9889; <span data-i18n="f_realtime">Real-time</span></strong><span data-i18n="f_realtime_d">Instant delivery via WebSocket</span></div>
+          <div class="feature-item"><strong>&#128274; <span data-i18n="f_secure">Secure</span></strong><span data-i18n="f_secure_d">UUID token, works only on local network</span></div>
+          <div class="feature-item"><strong>&#128260; <span data-i18n="f_bidirectional">Bidirectional</span></strong><span data-i18n="f_bidirectional_d">PC &#8594; Phone and Phone &#8594; PC</span></div>
+          <div class="feature-item"><strong>&#127822; <span data-i18n="f_shortcut">iOS Shortcut</span></strong><span data-i18n="f_shortcut_d">Send with one tap, no browser needed</span></div>
         </div>
       </div>
 
-      <!-- O'rnatish bosqichlari -->
       <div class="install-section">
-        <h3><span class="badge-tag badge-windows">Windows</span> Kompyuterga o'rnatish</h3>
-        <p>Oldin <a href="https://nodejs.org/" target="_blank" style="color:#6366f1;">Node.js</a> (v16+) o'rnatilgan bo'lishi kerak.</p>
-
-        <div class="step-row">
-          <span class="step-num">1</span>
-          <div class="step-text">
-            <strong>Loyihani yuklab olish</strong>
-            <div class="code-block" onclick="copyCode(this)">git clone https://github.com/SharofSoliyev/ClipboardSync.git</div>
-          </div>
-        </div>
-
-        <div class="step-row">
-          <span class="step-num">2</span>
-          <div class="step-text">
-            <strong>Papkaga kirish</strong>
-            <div class="code-block" onclick="copyCode(this)">cd ClipboardSync</div>
-          </div>
-        </div>
-
-        <div class="step-row">
-          <span class="step-num">3</span>
-          <div class="step-text">
-            <strong>Bog'liqliklarni o'rnatish</strong>
-            <div class="code-block" onclick="copyCode(this)">npm install</div>
-          </div>
-        </div>
-
-        <div class="step-row">
-          <span class="step-num">4</span>
-          <div class="step-text">
-            <strong>Serverni ishga tushirish</strong>
-            <div class="code-block" onclick="copyCode(this)">npm start</div>
-            <p style="margin-top:6px;">Yoki <code style="color:#a78bfa;">start.bat</code> faylni ikki marta bosing.</p>
-          </div>
-        </div>
+        <h3><span class="badge-tag badge-windows">Windows</span> <span data-i18n="install_pc">Install on Computer</span></h3>
+        <p><span data-i18n="prereq">Requires</span> <a href="https://nodejs.org/" target="_blank" style="color:#6366f1;">Node.js</a> (v16+)</p>
+        <div class="step-row"><span class="step-num">1</span><div class="step-text"><strong data-i18n="s_clone">Clone the project</strong><div class="code-block" data-copy-label="Copy" onclick="copyCode(this)">git clone https://github.com/SharofSoliyev/ClipboardSync.git</div></div></div>
+        <div class="step-row"><span class="step-num">2</span><div class="step-text"><strong data-i18n="s_cd">Enter folder</strong><div class="code-block" data-copy-label="Copy" onclick="copyCode(this)">cd ClipboardSync</div></div></div>
+        <div class="step-row"><span class="step-num">3</span><div class="step-text"><strong data-i18n="s_install">Install dependencies</strong><div class="code-block" data-copy-label="Copy" onclick="copyCode(this)">npm install</div></div></div>
+        <div class="step-row"><span class="step-num">4</span><div class="step-text"><strong data-i18n="s_start">Start the server</strong><div class="code-block" data-copy-label="Copy" onclick="copyCode(this)">npm start</div><p style="margin-top:6px;" data-i18n="s_start_alt">Or double-click <code style="color:#a78bfa;">start.bat</code></p></div></div>
       </div>
 
-      <!-- Telefon ulash -->
       <div class="install-section">
-        <h3>&#128241; Telefonni ulash</h3>
-        <div class="step-row">
-          <span class="step-num">1</span>
-          <div class="step-text">
-            <strong>Telefon va kompyuter bitta Wi-Fi tarmoqda</strong> bo'lishi kerak
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">2</span>
-          <div class="step-text">
-            Dashboard'dagi <strong>QR code</strong>'ni telefoningiz bilan skanerlang
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">3</span>
-          <div class="step-text">
-            Mobil sahifada clipboard sinxronlashni boshlang!
-          </div>
-        </div>
+        <h3>&#128241; <span data-i18n="connect_phone">Connect Your Phone</span></h3>
+        <div class="step-row"><span class="step-num">1</span><div class="step-text"><strong data-i18n="cp_1">Phone and computer must be on the same Wi-Fi</strong></div></div>
+        <div class="step-row"><span class="step-num">2</span><div class="step-text" data-i18n="cp_2">Scan the <strong>QR code</strong> from the Dashboard</div></div>
+        <div class="step-row"><span class="step-num">3</span><div class="step-text" data-i18n="cp_3">Start syncing on the mobile page!</div></div>
       </div>
 
-      <!-- iOS Shortcut -->
       <div class="install-section">
-        <h3><span class="badge-tag badge-ios">iOS</span> iOS Shortcut sozlash (tavsiya etiladi!)</h3>
-        <p>Brauzer ochmasdan <strong>bitta tugma</strong> bosib clipboard'ni PCga yuborasiz.</p>
-
-        <div class="step-row">
-          <span class="step-num">1</span>
-          <div class="step-text">
-            iPhone'da <strong>Shortcuts</strong> (Yorliqlar) ilovasini oching
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">2</span>
-          <div class="step-text">
-            <strong>"+"</strong> bosib yangi shortcut yarating. <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong> qo'shing
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">3</span>
-          <div class="step-text">
-            Yana <strong>"Add Action"</strong> &#8594; <strong>"Get Contents of URL"</strong> qo'shing. URL maydoniga:
-            <div class="url-display" id="installSendUrl" onclick="copyCode(this)">Yuklanmoqda...</div>
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">4</span>
-          <div class="step-text">
-            <strong>"Get Contents of URL"</strong> sozlamalarida:
-            <ul style="margin-top:6px;">
-              <li><strong>Method:</strong> POST</li>
-              <li><strong>Request Body:</strong> File</li>
-              <li><strong>File:</strong> Clipboard (oldingi action natijasi)</li>
-            </ul>
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">5</span>
-          <div class="step-text">
-            Shortcut'ga nom bering: <strong>"PC ga yuborish"</strong><br>
-            Tepadagi &#9660; belgini bosing &#8594; <strong>"Add to Home Screen"</strong>
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">6</span>
-          <div class="step-text">
-            Tayyor! Endi istalgan joyda <strong>copy</strong> qilib, home screen'dagi ikonkani bosasiz &#8594; <strong>avtomatik PCga tushadi!</strong>
-          </div>
-        </div>
-
+        <h3><span class="badge-tag badge-ios">iOS</span> <span data-i18n="ios_title">iOS Shortcut Setup (recommended!)</span></h3>
+        <p data-i18n="ios_desc">Send clipboard to PC with <strong>one tap</strong>, no browser needed.</p>
+        <div class="step-row"><span class="step-num">1</span><div class="step-text" data-i18n="ios_1">Open <strong>Shortcuts</strong> app on your iPhone</div></div>
+        <div class="step-row"><span class="step-num">2</span><div class="step-text" data-i18n="ios_2">Tap <strong>"+"</strong> to create new shortcut. <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong></div></div>
+        <div class="step-row"><span class="step-num">3</span><div class="step-text"><span data-i18n="ios_3">Add another action: <strong>"Get Contents of URL"</strong>. Set URL to:</span><div class="url-display" id="installSendUrl" onclick="copyCode(this)">Loading...</div></div></div>
+        <div class="step-row"><span class="step-num">4</span><div class="step-text"><span data-i18n="ios_4">Configure <strong>"Get Contents of URL"</strong>:</span><ul style="margin-top:6px;"><li><strong>Method:</strong> POST</li><li><strong>Request Body:</strong> File</li><li><strong>File:</strong> Clipboard</li></ul></div></div>
+        <div class="step-row"><span class="step-num">5</span><div class="step-text" data-i18n="ios_5">Name the shortcut. Tap &#9660; &#8594; <strong>"Add to Home Screen"</strong></div></div>
+        <div class="step-row"><span class="step-num">6</span><div class="step-text" data-i18n="ios_6">Done! Copy anything, tap the icon &#8594; <strong>instantly synced to PC!</strong></div></div>
         <div class="shortcut-img-guide">
           <p style="color:#a78bfa; font-weight:600; font-size:0.9rem;">&#128161; Back Tap (bonus)</p>
-          <p>Settings &#8594; Accessibility &#8594; Touch &#8594; Back Tap &#8594; Double Tap &#8594; yaratgan Shortcut'ingizni tanlang.</p>
-          <p>Endi telefonning orqasiga <strong>2 marta tiqillatib</strong> clipboard yuborasiz!</p>
+          <p data-i18n="backtap">Settings &#8594; Accessibility &#8594; Touch &#8594; Back Tap &#8594; Double Tap &#8594; select your Shortcut. Now <strong>double-tap the back of your phone</strong> to send clipboard!</p>
         </div>
       </div>
 
-      <!-- PC dan telefonga -->
       <div class="install-section">
-        <h3><span class="badge-tag badge-ios">iOS</span> PC &#8594; Telefon Shortcut</h3>
-        <p>PC clipboard'ini telefonga olish uchun yana bitta shortcut yarating:</p>
-        <div class="step-row">
-          <span class="step-num">1</span>
-          <div class="step-text">
-            Yangi Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:
-            <div class="url-display" id="installGetUrl" onclick="copyCode(this)">Yuklanmoqda...</div>
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">2</span>
-          <div class="step-text">
-            <strong>"Copy to Clipboard"</strong> action qo'shing. Natija avtomatik clipboard'ga tushadi.
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">3</span>
-          <div class="step-text">
-            Nom: <strong>"PC dan olish"</strong>, Home Screen'ga qo'shing.
-          </div>
-        </div>
+        <h3><span class="badge-tag badge-ios">iOS</span> <span data-i18n="pc_to_phone">PC &#8594; Phone Shortcut</span></h3>
+        <p data-i18n="pc_to_phone_desc">Create another shortcut to get PC clipboard on your phone:</p>
+        <div class="step-row"><span class="step-num">1</span><div class="step-text"><span data-i18n="ptp_1">New Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:</span><div class="url-display" id="installGetUrl" onclick="copyCode(this)">Loading...</div></div></div>
+        <div class="step-row"><span class="step-num">2</span><div class="step-text" data-i18n="ptp_2">Add <strong>"Copy to Clipboard"</strong> action.</div></div>
+        <div class="step-row"><span class="step-num">3</span><div class="step-text" data-i18n="ptp_3">Name it and add to Home Screen.</div></div>
       </div>
 
-      <!-- Android -->
       <div class="install-section">
-        <h3><span class="badge-tag badge-android">Android</span> Android sozlash</h3>
-        <p><a href="https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts" target="_blank" style="color:#86efac;">HTTP Shortcuts</a> ilovasini Play Store'dan o'rnating.</p>
-        <div class="step-row">
-          <span class="step-num">1</span>
-          <div class="step-text">Yangi shortcut yarating</div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">2</span>
-          <div class="step-text">
-            URL:
-            <div class="url-display" id="installAndroidUrl" onclick="copyCode(this)">Yuklanmoqda...</div>
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">3</span>
-          <div class="step-text">
-            Method: <strong>POST</strong>, Body: <code style="color:#86efac;">{%clipboard}</code>
-          </div>
-        </div>
-        <div class="step-row">
-          <span class="step-num">4</span>
-          <div class="step-text">Home screen'ga qo'shing — tayyor!</div>
-        </div>
+        <h3><span class="badge-tag badge-android">Android</span> <span data-i18n="android_title">Android Setup</span></h3>
+        <p><span data-i18n="android_desc">Install</span> <a href="https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts" target="_blank" style="color:#86efac;">HTTP Shortcuts</a> <span data-i18n="android_desc2">from Play Store.</span></p>
+        <div class="step-row"><span class="step-num">1</span><div class="step-text" data-i18n="and_1">Create a new shortcut</div></div>
+        <div class="step-row"><span class="step-num">2</span><div class="step-text">URL:<div class="url-display" id="installAndroidUrl" onclick="copyCode(this)">Loading...</div></div></div>
+        <div class="step-row"><span class="step-num">3</span><div class="step-text">Method: <strong>POST</strong>, Body: <code style="color:#86efac;">{%clipboard}</code></div></div>
+        <div class="step-row"><span class="step-num">4</span><div class="step-text" data-i18n="and_4">Add to home screen — done!</div></div>
       </div>
 
-      <!-- API ma'lumotlari -->
       <div class="install-section">
-        <h3>&#128268; API Endpointlari</h3>
-        <p>Boshqa ilovalar yoki skriptlar bilan integratsiya qilish uchun:</p>
+        <h3>&#128268; API Endpoints</h3>
+        <p data-i18n="api_desc">For integration with other apps or scripts:</p>
         <div style="overflow-x:auto; margin-top:12px;">
           <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
-            <tr style="border-bottom:1px solid #2a2a3a;">
-              <th style="text-align:left; padding:10px; color:#a78bfa;">Endpoint</th>
-              <th style="text-align:left; padding:10px; color:#a78bfa;">Method</th>
-              <th style="text-align:left; padding:10px; color:#a78bfa;">Tavsif</th>
-            </tr>
-            <tr style="border-bottom:1px solid #1a1a2e;">
-              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/send</td>
-              <td style="padding:10px;">GET/POST</td>
-              <td style="padding:10px; color:#aaa;">Matn yoki rasm yuborish</td>
-            </tr>
-            <tr style="border-bottom:1px solid #1a1a2e;">
-              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/get</td>
-              <td style="padding:10px;">GET</td>
-              <td style="padding:10px; color:#aaa;">PC clipboard'ini olish</td>
-            </tr>
-            <tr style="border-bottom:1px solid #1a1a2e;">
-              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/clipboard</td>
-              <td style="padding:10px;">GET/POST</td>
-              <td style="padding:10px; color:#aaa;">JSON formatda clipboard boshqarish</td>
-            </tr>
-            <tr style="border-bottom:1px solid #1a1a2e;">
-              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/api/image</td>
-              <td style="padding:10px;">GET</td>
-              <td style="padding:10px; color:#aaa;">Oxirgi rasm</td>
-            </tr>
-            <tr>
-              <td style="padding:10px; color:#8b5cf6; font-family:monospace;">/ws</td>
-              <td style="padding:10px;">WebSocket</td>
-              <td style="padding:10px; color:#aaa;">Real-time sinxronlash</td>
-            </tr>
+            <tr style="border-bottom:1px solid #2a2a3a;"><th style="text-align:left;padding:10px;color:#a78bfa;">Endpoint</th><th style="text-align:left;padding:10px;color:#a78bfa;">Method</th><th style="text-align:left;padding:10px;color:#a78bfa;" data-i18n="th_desc">Description</th></tr>
+            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:10px;color:#8b5cf6;font-family:monospace;">/api/send</td><td style="padding:10px;">GET/POST</td><td style="padding:10px;color:#aaa;" data-i18n="api_send">Send text or image</td></tr>
+            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:10px;color:#8b5cf6;font-family:monospace;">/api/get</td><td style="padding:10px;">GET</td><td style="padding:10px;color:#aaa;" data-i18n="api_get">Get PC clipboard</td></tr>
+            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:10px;color:#8b5cf6;font-family:monospace;">/api/clipboard</td><td style="padding:10px;">GET/POST</td><td style="padding:10px;color:#aaa;" data-i18n="api_clip">Manage clipboard (JSON)</td></tr>
+            <tr style="border-bottom:1px solid #1a1a2e;"><td style="padding:10px;color:#8b5cf6;font-family:monospace;">/api/image</td><td style="padding:10px;">GET</td><td style="padding:10px;color:#aaa;" data-i18n="api_img">Last received image</td></tr>
+            <tr><td style="padding:10px;color:#8b5cf6;font-family:monospace;">/ws</td><td style="padding:10px;">WebSocket</td><td style="padding:10px;color:#aaa;" data-i18n="api_ws">Real-time sync</td></tr>
           </table>
         </div>
-        <p style="margin-top:10px; font-size:0.8rem; color:#666;">Barcha endpointlarga <code style="color:#a78bfa;">?token=YOUR_TOKEN</code> qo'shish kerak.</p>
+        <p style="margin-top:10px;font-size:0.8rem;color:#666;" data-i18n="api_note">All endpoints require <code style="color:#a78bfa;">?token=YOUR_TOKEN</code></p>
       </div>
 
     </div>
   </div>
 
   <div class="footer">
-    ClipSync v1.0 | <a href="https://github.com/SharofSoliyev/ClipboardSync" target="_blank">GitHub</a> | Open Source | Token 1 oy amal qiladi
+    ClipSync v1.0 | <a href="https://github.com/SharofSoliyev/ClipboardSync" target="_blank">GitHub</a> | MIT License
   </div>
 
   <script>
+    // === i18n ===
+    const i18n = {
+      en: {
+        header_sub: 'Sync clipboard between phone and computer',
+        tab_dashboard: '&#128200; Dashboard',
+        tab_install: '&#128218; Setup',
+        server_info: '&#128225; Server Info',
+        status: 'Status',
+        running: 'Running',
+        ip_address: 'IP Address',
+        connected_devices: 'Connected devices',
+        current_clipboard: '&#128203; Current Clipboard',
+        loading: 'Loading...',
+        quick_start: 'Quick Start',
+        qs_1: 'Scan the QR code with your phone (or open the URL in browser)',
+        qs_2: 'Type or paste text on your phone — it syncs to your computer automatically',
+        qs_3: 'Text copied on your computer appears on your phone automatically',
+        qs_4: 'Both devices must be on the same Wi-Fi network!',
+        what_is: 'What is ClipSync?',
+        what_is_desc: 'ClipSync is a tool that syncs clipboard between your phone and Windows computer. Like Apple\'s Universal Clipboard — but for Windows.',
+        f_text: 'Text', f_text_d: 'Sync text in any language (Cyrillic, Latin, CJK...)',
+        f_images: 'Images', f_images_d: 'PNG, JPEG, GIF, WebP, BMP clipboard support',
+        f_realtime: 'Real-time', f_realtime_d: 'Instant delivery via WebSocket',
+        f_secure: 'Secure', f_secure_d: 'UUID token, works only on local network',
+        f_bidirectional: 'Bidirectional', f_bidirectional_d: 'PC &#8594; Phone and Phone &#8594; PC',
+        f_shortcut: 'iOS Shortcut', f_shortcut_d: 'Send with one tap, no browser needed',
+        install_pc: 'Install on Computer',
+        prereq: 'Requires',
+        s_clone: 'Clone the project',
+        s_cd: 'Enter folder',
+        s_install: 'Install dependencies',
+        s_start: 'Start the server',
+        s_start_alt: 'Or double-click <code style="color:#a78bfa;">start.bat</code>',
+        connect_phone: 'Connect Your Phone',
+        cp_1: 'Phone and computer must be on the same Wi-Fi',
+        cp_2: 'Scan the <strong>QR code</strong> from the Dashboard',
+        cp_3: 'Start syncing on the mobile page!',
+        ios_title: 'iOS Shortcut Setup (recommended!)',
+        ios_desc: 'Send clipboard to PC with <strong>one tap</strong>, no browser needed.',
+        ios_1: 'Open <strong>Shortcuts</strong> app on your iPhone',
+        ios_2: 'Tap <strong>"+"</strong> to create new shortcut. <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong>',
+        ios_3: 'Add another action: <strong>"Get Contents of URL"</strong>. Set URL to:',
+        ios_4: 'Configure <strong>"Get Contents of URL"</strong>:',
+        ios_5: 'Name the shortcut. Tap &#9660; &#8594; <strong>"Add to Home Screen"</strong>',
+        ios_6: 'Done! Copy anything, tap the icon &#8594; <strong>instantly synced to PC!</strong>',
+        backtap: 'Settings &#8594; Accessibility &#8594; Touch &#8594; Back Tap &#8594; Double Tap &#8594; select your Shortcut. Now <strong>double-tap the back of your phone</strong> to send clipboard!',
+        pc_to_phone: 'PC &#8594; Phone Shortcut',
+        pc_to_phone_desc: 'Create another shortcut to get PC clipboard on your phone:',
+        ptp_1: 'New Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:',
+        ptp_2: 'Add <strong>"Copy to Clipboard"</strong> action.',
+        ptp_3: 'Name it and add to Home Screen.',
+        android_title: 'Android Setup',
+        android_desc: 'Install', android_desc2: 'from Play Store.',
+        and_1: 'Create a new shortcut',
+        and_4: 'Add to home screen — done!',
+        api_desc: 'For integration with other apps or scripts:',
+        th_desc: 'Description',
+        api_send: 'Send text or image', api_get: 'Get PC clipboard', api_clip: 'Manage clipboard (JSON)', api_img: 'Last received image', api_ws: 'Real-time sync',
+        api_note: 'All endpoints require <code style="color:#a78bfa;">?token=YOUR_TOKEN</code>',
+        token_expires: 'Token valid until',
+        copied: 'Copied!',
+        empty: '(empty)',
+        copy_label: 'Copy'
+      },
+      uz: {
+        header_sub: 'Telefon va kompyuter o\'rtasida clipboard sinxronlash',
+        tab_dashboard: '&#128200; Boshqaruv',
+        tab_install: '&#128218; O\'rnatish',
+        server_info: '&#128225; Server Ma\'lumotlari',
+        status: 'Holat',
+        running: 'Ishlamoqda',
+        ip_address: 'IP Manzil',
+        connected_devices: 'Ulangan qurilmalar',
+        current_clipboard: '&#128203; Joriy Clipboard',
+        loading: 'Yuklanmoqda...',
+        quick_start: 'Tezkor boshlash',
+        qs_1: 'Telefonda QR kodni skanerlang (yoki URL manzilni brauzerda oching)',
+        qs_2: 'Telefoningizda matn yozing yoki joylashtiring — avtomatik kompyuterga yuboriladi',
+        qs_3: 'Kompyuterda nusxalangan matn avtomatik telefoningizda ko\'rinadi',
+        qs_4: 'Bitta Wi-Fi tarmoqda bo\'lishingiz kerak!',
+        what_is: 'ClipSync nima?',
+        what_is_desc: 'ClipSync — telefoningiz va Windows kompyuter o\'rtasida clipboard\'ni sinxronlash vositasi. Huddi Apple\'ning Universal Clipboard xususiyati — faqat Windows uchun.',
+        f_text: 'Matn', f_text_d: 'Har qanday tildagi matnni sinxronlash (kirill, lotin, xitoy...)',
+        f_images: 'Rasmlar', f_images_d: 'PNG, JPEG, GIF, WebP, BMP rasmlarni clipboard\'ga o\'rnatish',
+        f_realtime: 'Real-time', f_realtime_d: 'WebSocket orqali bir zumda yetkazish',
+        f_secure: 'Xavfsiz', f_secure_d: 'UUID token, faqat lokal tarmoqda ishlaydi',
+        f_bidirectional: 'Ikki tomonlama', f_bidirectional_d: 'PC &#8594; Telefon va Telefon &#8594; PC',
+        f_shortcut: 'iOS Shortcut', f_shortcut_d: 'Brauzer ochmasdan bitta tugma bilan yuborish',
+        install_pc: 'Kompyuterga o\'rnatish',
+        prereq: 'Oldin kerak',
+        s_clone: 'Loyihani yuklab olish',
+        s_cd: 'Papkaga kirish',
+        s_install: 'Bog\'liqliklarni o\'rnatish',
+        s_start: 'Serverni ishga tushirish',
+        s_start_alt: 'Yoki <code style="color:#a78bfa;">start.bat</code> faylni ikki marta bosing.',
+        connect_phone: 'Telefonni ulash',
+        cp_1: 'Telefon va kompyuter bitta Wi-Fi tarmoqda bo\'lishi kerak',
+        cp_2: 'Dashboard\'dagi <strong>QR code</strong>\'ni telefoningiz bilan skanerlang',
+        cp_3: 'Mobil sahifada clipboard sinxronlashni boshlang!',
+        ios_title: 'iOS Shortcut sozlash (tavsiya etiladi!)',
+        ios_desc: 'Brauzer ochmasdan <strong>bitta tugma</strong> bosib clipboard\'ni PCga yuborasiz.',
+        ios_1: 'iPhone\'da <strong>Shortcuts</strong> (Yorliqlar) ilovasini oching',
+        ios_2: '<strong>"+"</strong> bosib yangi shortcut yarating. <strong>"Add Action"</strong> &#8594; <strong>"Get Clipboard"</strong> qo\'shing',
+        ios_3: 'Yana <strong>"Add Action"</strong> &#8594; <strong>"Get Contents of URL"</strong> qo\'shing. URL maydoniga:',
+        ios_4: '<strong>"Get Contents of URL"</strong> sozlamalarida:',
+        ios_5: 'Shortcut\'ga nom bering. &#9660; belgini bosing &#8594; <strong>"Add to Home Screen"</strong>',
+        ios_6: 'Tayyor! Istalgan joyda <strong>copy</strong> qilib, ikonkani bosasiz &#8594; <strong>avtomatik PCga tushadi!</strong>',
+        backtap: 'Settings &#8594; Accessibility &#8594; Touch &#8594; Back Tap &#8594; Double Tap &#8594; Shortcut\'ingizni tanlang. Endi telefonning orqasiga <strong>2 marta tiqillatib</strong> clipboard yuborasiz!',
+        pc_to_phone: 'PC &#8594; Telefon Shortcut',
+        pc_to_phone_desc: 'PC clipboard\'ini telefonga olish uchun yana bitta shortcut yarating:',
+        ptp_1: 'Yangi Shortcut &#8594; <strong>"Get Contents of URL"</strong>. URL:',
+        ptp_2: '<strong>"Copy to Clipboard"</strong> action qo\'shing.',
+        ptp_3: 'Nom bering va Home Screen\'ga qo\'shing.',
+        android_title: 'Android sozlash',
+        android_desc: 'O\'rnating', android_desc2: 'Play Store\'dan.',
+        and_1: 'Yangi shortcut yarating',
+        and_4: 'Home screen\'ga qo\'shing — tayyor!',
+        api_desc: 'Boshqa ilovalar yoki skriptlar bilan integratsiya qilish uchun:',
+        th_desc: 'Tavsif',
+        api_send: 'Matn yoki rasm yuborish', api_get: 'PC clipboard\'ini olish', api_clip: 'Clipboard boshqarish (JSON)', api_img: 'Oxirgi rasm', api_ws: 'Real-time sinxronlash',
+        api_note: 'Barcha endpointlarga <code style="color:#a78bfa;">?token=YOUR_TOKEN</code> qo\'shish kerak',
+        token_expires: 'Token amal qiladi',
+        copied: 'Nusxalandi!',
+        empty: '(bo\'sh)',
+        copy_label: 'Nusxalash'
+      }
+    };
+
+    let currentLang = localStorage.getItem('clipsync_lang') || 'en';
+
+    function setLang(lang) {
+      currentLang = lang;
+      localStorage.setItem('clipsync_lang', lang);
+      applyLang();
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.lang-btn[onclick="setLang('${lang}')"]`).classList.add('active');
+    }
+
+    function t(key) { return i18n[currentLang][key] || i18n.en[key] || key; }
+
+    function applyLang() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (i18n[currentLang][key]) el.innerHTML = i18n[currentLang][key];
+      });
+      document.querySelectorAll('.code-block').forEach(el => {
+        el.setAttribute('data-copy-label', t('copy_label'));
+      });
+      document.documentElement.lang = currentLang === 'uz' ? 'uz' : 'en';
+    }
+
     // === PAGE SWITCHING ===
     function switchPage(name) {
       document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
@@ -616,7 +613,6 @@
       event.target.classList.add('active');
     }
 
-    // === CODE COPY ===
     function copyCode(el) {
       const text = el.textContent;
       if (navigator.clipboard) {
@@ -639,29 +635,26 @@
         document.getElementById('portNum').textContent = data.port;
         const expires = new Date(data.expiresAt);
         document.getElementById('expireBadge').textContent =
-          `Token: ${expires.toLocaleDateString()} gacha amal qiladi`;
+          `${t('token_expires')}: ${expires.toLocaleDateString()}`;
       } catch (err) {
-        console.error('Dashboard yuklashda xato:', err);
+        console.error('Dashboard error:', err);
       }
     }
 
-    // URL nusxalash
     document.getElementById('qrUrl').addEventListener('click', function() {
       navigator.clipboard.writeText(this.textContent).then(() => {
         const orig = this.textContent;
-        this.textContent = 'Nusxalandi!';
+        this.textContent = t('copied');
         setTimeout(() => this.textContent = orig, 1500);
       });
     });
 
-    // Token olish va saqlash
     let dashToken = '';
     async function getToken() {
       try {
         const res = await fetch('/api/shortcut');
         const data = await res.json();
         dashToken = data.token;
-        // Install sahifasidagi URL'larni ham yangilash
         if (document.getElementById('installSendUrl'))
           document.getElementById('installSendUrl').textContent = data.sendUrl;
         if (document.getElementById('installGetUrl'))
@@ -671,7 +664,6 @@
       } catch {}
     }
 
-    // Clipboard va qurilmalar sonini yangilash
     async function updateStatus() {
       if (!dashToken) await getToken();
       try {
@@ -684,13 +676,15 @@
         if (clipData.text !== undefined) {
           const preview = clipData.text.length > 500
             ? clipData.text.substring(0, 500) + '...'
-            : clipData.text || '(bo\'sh)';
+            : clipData.text || t('empty');
           document.getElementById('clipboardPreview').textContent = preview;
         }
         document.getElementById('deviceCount').textContent = infoData.connectedDevices;
       } catch {}
     }
 
+    // Init
+    setLang(currentLang);
     loadDashboard();
     getToken().then(() => {
       updateStatus();
