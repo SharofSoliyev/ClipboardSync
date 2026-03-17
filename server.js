@@ -7,7 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 const IMAGES_DIR = path.join(__dirname, 'images');
@@ -180,24 +180,46 @@ function detectImageType(buffer) {
   return null;
 }
 
-// --- Rasmni Windows clipboard'iga qo'yish (PowerShell) ---
-function setImageToClipboard(imagePath) {
+// --- Rasmni Windows clipboard'iga qo'yish (PowerShell - asinxron) ---
+function setImageToClipboard(imagePath, callback) {
   const absPath = path.resolve(imagePath).replace(/\//g, '\\');
   const psScript = path.join(os.tmpdir(), 'clipsync_img.ps1');
   const psContent = `Add-Type -AssemblyName System.Windows.Forms\nAdd-Type -AssemblyName System.Drawing\n$img = [System.Drawing.Image]::FromFile('${absPath}')\n[System.Windows.Forms.Clipboard]::SetImage($img)\n$img.Dispose()`;
   fs.writeFileSync(psScript, psContent.replace(/\\n/g, '\r\n'));
-  execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${psScript}"`, { timeout: 10000 });
+  if (callback) {
+    exec(`powershell -NoProfile -ExecutionPolicy Bypass -File "${psScript}"`, { timeout: 15000 }, callback);
+  } else {
+    execSync(`powershell -NoProfile -ExecutionPolicy Bypass -File "${psScript}"`, { timeout: 15000 });
+  }
 }
 
 // --- Express server ---
 const app = express();
 const server = http.createServer(app);
 
+// Server timeout va keep-alive sozlamalari (iOS timeout oldini olish)
+server.keepAliveTimeout = 65000;
+server.headersTimeout = 66000;
+server.timeout = 120000;
+
+// CORS - iOS/Android dan so'rovlarga ruxsat
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Token');
+  res.header('Connection', 'keep-alive');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  next();
+});
+
 // Body parsers
 app.use(express.json({ limit: '50mb' }));
 app.use(express.text({ type: 'text/*', limit: '50mb' }));
 // Rasmlar uchun raw parser - katta limitli
 app.use(express.raw({ type: '*/*', limit: '50mb' }));
+
+// Health check - tez javob (timeout test uchun)
+app.get('/api/ping', (req, res) => res.send('pong'));
 
 app.use('/images', express.static(IMAGES_DIR));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -258,33 +280,23 @@ app.get('/api/info', (req, res) => {
 // === ASOSIY SEND ENDPOINT (matn + rasm) ===
 function handleSend(req, res) {
   let body = req.body;
-
-  // DEBUG: nima kelayotganini ko'rish
-  console.log('--- SO\'ROV KELDI ---');
-  console.log('Method:', req.method);
-  console.log('Content-Type:', req.headers['content-type']);
-  console.log('Body type:', typeof body);
-  console.log('Body is Buffer:', Buffer.isBuffer(body));
-  console.log('Body length:', body ? (Buffer.isBuffer(body) ? body.length : (typeof body === 'string' ? body.length : JSON.stringify(body).length)) : 0);
-  console.log('Query text:', req.query.text || '(yo\'q)');
-  if (Buffer.isBuffer(body) && body.length > 0) {
-    console.log('Birinchi baytlar:', body.slice(0, 10).toString('hex'));
-  } else if (typeof body === 'string') {
-    console.log('Body boshi:', body.substring(0, 100));
-  }
-  console.log('-------------------');
+  const ct = req.headers['content-type'] || '';
+  const bodyLen = body ? (Buffer.isBuffer(body) ? body.length : (typeof body === 'string' ? body.length : 0)) : 0;
+  console.log(`[SEND] ${req.method} | ${ct} | ${bodyLen} bytes`);
 
   // GET so'rov - query param dan matn
   if (req.method === 'GET' && req.query.text) {
+    // Darhol javob ber, keyin clipboard yoz
+    res.send('OK');
     try {
       clipboard.writeSync(req.query.text);
       lastClipboard = req.query.text;
       broadcastClipboard(req.query.text, 'phone');
-      console.log('Matn clipboard yangilandi:', req.query.text.substring(0, 50));
-      return res.send('OK');
+      console.log('[SEND] Text:', req.query.text.substring(0, 50));
     } catch (err) {
-      return res.status(500).send('Xatolik: ' + err.message);
+      console.error('[SEND] Clipboard xato:', err.message);
     }
+    return;
   }
 
   // Body ni Buffer ga aylantirish
@@ -299,22 +311,21 @@ function handleSend(req, res) {
   if (buf && buf.length > 0) {
     const imgType = detectImageType(buf);
     if (imgType) {
-      // Bu RASM!
       const filename = `clip_${Date.now()}.${imgType}`;
       const filepath = path.join(IMAGES_DIR, filename);
       fs.writeFileSync(filepath, buf);
+      lastImageFile = filepath;
+      const imageUrl = `${BASE_URL}/images/${filename}`;
 
-      try {
-        setImageToClipboard(filepath);
-        lastImageFile = filepath;
-        const imageUrl = `${BASE_URL}/images/${filename}`;
-        broadcastImage(imageUrl, 'phone');
-        console.log(`Rasm clipboard'ga qo'yildi: ${filename} (${(buf.length / 1024).toFixed(1)}KB)`);
-        return res.send('OK - rasm');
-      } catch (err) {
-        console.error('Rasm clipboard xato:', err.message);
-        return res.status(500).send('Rasm clipboard xato: ' + err.message);
-      }
+      // DARHOL javob ber — PowerShell fonda ishlaydi (iOS timeout bo'lmaydi)
+      res.send('OK');
+      broadcastImage(imageUrl, 'phone');
+
+      setImageToClipboard(filepath, (err) => {
+        if (err) console.error('[SEND] Rasm clipboard xato:', err.message);
+        else console.log(`[SEND] Rasm: ${filename} (${(buf.length / 1024).toFixed(1)}KB)`);
+      });
+      return;
     }
   }
 
@@ -329,33 +340,32 @@ function handleSend(req, res) {
   }
   text = text || req.query.text || '';
 
-  // RTF formatni oddiy matnga aylantirish (iOS Shortcuts RTF yuboradi)
+  // RTF formatni oddiy matnga aylantirish
   if (text.startsWith('{\\rtf')) {
-    console.log('RTF aniqlandi, oddiy matnga aylantirilmoqda...');
     text = rtfToText(text);
-    console.log('Tozalangan matn:', text.substring(0, 100));
+    console.log('[SEND] RTF → text:', text.substring(0, 80));
   }
 
-  // HTML formatni tozalash (iOS link copy qilganda HTML yuboradi)
+  // HTML formatni tozalash
   const trimmed = text.trimStart().toLowerCase();
   if (trimmed.startsWith('<!doctype') || trimmed.startsWith('<html') || trimmed.startsWith('<meta') || trimmed.startsWith('<head')) {
-    console.log('HTML aniqlandi, link/matn ajratilmoqda...');
     text = extractFromHtml(text);
-    console.log('Ajratilgan:', text.substring(0, 100));
+    console.log('[SEND] HTML → extracted:', text.substring(0, 80));
   }
 
   if (!text) {
     return res.status(400).send('Text yoki rasm kerak');
   }
+
+  // DARHOL javob ber, keyin clipboard yoz
+  res.send('OK');
   try {
     clipboard.writeSync(text);
     lastClipboard = text;
     broadcastClipboard(text, 'phone');
-    console.log('Matn clipboard yangilandi:', text.substring(0, 50));
-    res.send('OK');
+    console.log('[SEND] Text:', text.substring(0, 50));
   } catch (err) {
-    console.error('Clipboard yozishda xato:', err.message);
-    res.status(500).send('Xatolik: ' + err.message);
+    console.error('[SEND] Clipboard xato:', err.message);
   }
 }
 
